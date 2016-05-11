@@ -1,0 +1,23 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% extends "security/index.html" %}
+
+{% block title %}
+Openstax eGrader | Resend confirmation email
+{% endblock %}
+
+{% block form_content %}
+
+    <h2><small>Openstax eGrader</small></h2>
+    <h1>Confirm email</h1>
+    <form action="{{ url_for('security.send_confirmation') }}" method="POST" name="send_confirmation_form">
+        {{ send_confirmation_form.hidden_tag() }}
+
+        {{ wtf.form_errors(send_confirmation_form) }}
+
+        {{ wtf.form_field(send_confirmation_form.email) }}
+        {{ wtf.form_field(send_confirmation_form.submit) }}
+
+    </form>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Openstax eGrader
+{% endblock %}
+
+
+{% block navbar %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="jumbotron">
+    <div class="row">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-8">
+            {% block form_content %}{% endblock %}
+        </div>
+        <div class="col-xs-2"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+
+{{ super() }}
+<style>
+ form {
+   padding-top: 24px;
+ }
+</style>
+
+{% endblock %}

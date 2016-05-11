@@ -1,0 +1,72 @@
+{% extends 'layouts/base.html' %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+{% endblock styles %}
+
+{% block navbar %}
+    {% include 'layouts/nav.html' %}
+{% endblock navbar %}
+
+{% block content %}
+
+    <div class="main">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10">
+
+                    <div class="question-panel">
+                        <div class="question-text">
+                            <h1>Q:</h1>
+                            {{ exercise.exercise_html | safe}}
+                        </div>
+
+                        <div class="correct-answertext">
+                            <h1>A:</h1>
+                            {{ exercise.answer_html }}
+                        </div>
+                        <div class="student-response">
+                            <h1>R:</h1>
+                            {{ free_response }}
+                        </div>
+                        <div class="grader-panel">
+                            <form action="{{ url_for('grader.grade_next_response') }}" method="post" id="grade-response-form">
+                                <fieldset class="form-group">
+                                    <legend>Grade the Student's Response</legend>
+                                    {{ form.csrf_token() }}
+
+                                    <ol class="list-unstyled">
+                                        <li>
+                                            {{ form.response_id }}
+                                        </li>
+                                        <li>
+                                            {{ form.quality.label }}
+                                            {{ form.quality(class_='form-control') }}
+                                        </li>
+                                        <li>
+                                            {{ form.score.label }}
+                                            {{ form.score(class_='form-control') }}
+                                        </li>
+                                        <li>
+                                            {{ form.misconception.label }}
+                                            {{ form.misconception(class_='form-control') }}
+
+                                        </li>
+                                        <li>
+                                            {{ form.feedback.label }}
+                                            {{ form.feedback(class_='form-control') }}
+                                        </li>
+                                    </ol>
+                                    {{ form.submit(class_='btn btn-primary') }}
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

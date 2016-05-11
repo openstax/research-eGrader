@@ -1,0 +1,16 @@
+from instance.conf import MAIL_PASSWORD
+
+SECURITY_PASSWORD_HASH = 'bcrypt'
+SECURITY_PASSWORD_SALT = 'openstax-biglearn-ost-labs'
+SECURITY_CONFIRMABLE = True
+SECURITY_REGISTERABLE = True
+SECURITY_RECOVERABLE = True
+SECURITY_TRACKABLE = True
+SECURITY_CHANGEABLE = True
+SECURITY_EMAIL_SENDER = 'Openstax Labs<no-reply@labs.openstax.org>'
+MAIL_SERVER = 'smtp.gmail.com'
+MAIL_PORT = 587
+MAIL_USE_TLS = True
+MAIL_USE_SSL = False
+MAIL_USERNAME = 'openstaxlabs@gmail.com'
+MAIL_PASSWORD = MAIL_PASSWORD

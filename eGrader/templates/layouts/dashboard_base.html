@@ -1,0 +1,35 @@
+{% extends 'layouts/base.html' %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+{% endblock styles %}
+
+
+{% block navbar %}
+    {% include 'layouts/nav.html' %}
+{% endblock navbar %}
+
+{% block sidebar %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+                    <li class="active">
+                        <a href="#">Overview</a>
+                    </li>
+                 </ul>
+                <ul id="logout_sidebar_button" class="nav nav-sidebar">
+                    <li><a id="begin-grading" class="btn btn-lg btn-success begin-grading" href="{{ url_for('grader.grade_next_response') }}">Begin Grading</a></li>
+                </ul>
+
+            </div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+    </div>
+
+{% endblock sidebar %}

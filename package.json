@@ -1,0 +1,28 @@
+{
+  "name": "egrader",
+  "version": "0.0.2",
+  "description": "A Flask web-application to allow expert graders to provide feedback on student free-form responses.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node_modules/.bin/webpack-dev-server --port 2992 --content-base eGrader/build/public --hot",
+    "build": "webpack --display-error-details --progress --profile --colors"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/openstax/research-eGrader.git"
+  },
+  "author": "m1yag1",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "manifest-revision-webpack-plugin": "^0.1.0",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.12.14",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "bugs": {
+    "url": "https://github.com/openstax/research-eGrader/issues"
+  },
+  "homepage": "https://github.com/openstax/research-eGrader#readme"
+}

@@ -1,0 +1,61 @@
+{% block doc -%}
+    <!DOCTYPE html>
+    <html {% block html_attribs %}{% endblock html_attribs %}>
+    {%- block html %}
+        <head>
+            {%- block head %}
+                <title>{% block title %}{% endblock title %}</title>
+
+                {%- block metas %}
+                    <meta name="viewport" content="width=device-width">
+                {%- endblock metas %}
+
+                {%- block styles %}
+                    <!-- ADD CSS STYLE SOURCES NEEDED FOR ALL TEMPLATES -->
+                    <link href="{{ url_for('static', filename='css/lib/bootstrap-3.3.6.min.css') }}" rel="stylesheet">
+                {%- endblock styles %}
+
+            {% endblock head %}
+
+        </head>
+
+        <body{% block body_attribs %}{% endblock body_attribs %}>
+        {% block body -%}
+
+            {% block header %}
+            {% endblock header %}
+
+            {% block navbar %}
+            {% endblock navbar %}
+
+            {% block sidebar %}
+
+                {% block content %}
+                {% endblock content %}
+
+            {% endblock sidebar %}
+
+            {% block footer %}
+            {% endblock footer %}
+
+            {% block scripts %}
+                <noscript>
+                    <h1>Warning: Javascript seems to be disabled</h1>
+                    <p>This website requires that Javascript be enabled on your browser.</p>
+                    <p>Instructions for enabling Javascript in your browser can be found
+                        <a href="http://support.google.com/bin/answer.py?hl=en&answer=23852">here</a>
+                    <p>
+                </noscript>
+                <!-- ADD JAVASCRIPT SOURCES NEEDED FOR ALL TEMPLATES -->
+                <script src="{{ url_for('static', filename='js/lib/jquery-1.11.3.min.js') }}"></script>
+                <script src="{{ url_for('static', filename='js/lib/bootstrap-3.3.6.min.js') }}"></script>
+            {% endblock scripts %}
+
+        {%- endblock body %}
+        </body>
+
+    {% endblock html %}
+    </html>
+
+
+{% endblock doc %}
