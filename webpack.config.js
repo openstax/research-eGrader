@@ -16,7 +16,7 @@ module.exports = {
     entry: {
         app_js: [
             'webpack/hot/dev-server',
-            rootAssetPath + '/js/index'
+            rootAssetPath + '/js/app/main'
         ],
         app_css: [
             cssAssetPath
@@ -35,6 +35,14 @@ module.exports = {
     },
     module: {
         loaders: [
+            {
+                test: /\.jsx?$/,
+                exclude: /(node_modules)/,
+                loader: 'babel',
+                query: {
+                    presets: ['es2015']
+                }
+            },
             {
                 test: /\.css$/i,
                 loader: ExtractTextPlugin.extract('style-loader', 'css-loader')

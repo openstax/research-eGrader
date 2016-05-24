@@ -11,32 +11,152 @@ table {
 }
 
 th {
-    width:50px;
+    width: 50px;
 
 }
 
 tr {
-    width:75px;
+    width: 75px;
 
 }
 
 th, td {
     /* cellpadding */
-     padding: 0 10px;
+    padding: 0 10px;
 
 }
 
-.main {
-    padding: 20px;
+.extra_options {
+    display: none;
 }
 
-@media (min-width: 768px) {
-    .main {
-        padding-right: 40px;
-        padding-left: 40px;
+.border_bg {
+    background-color: #F8F8F8;
+    border: 1px solid #e7e7e7;
+    padding: 10px;
+}
+
+.clear {
+    clear: both;
+}
+
+span textarea {
+    width: 100%
+}
+
+button {
+    width: 100%;
+}
+
+.margin {
+    margin: 10px 0;
+}
+
+.padding_small {
+    padding: 10px;
+}
+
+.small_margin {
+    margin: 5px 0;
+}
+
+.quality_ul {
+    margin: 0;
+    padding: 0;
+}
+
+.quality_ul li {
+    list-style: none;
+    margin: 10px 0;
+    width: 100%;
+    height: 32px;
+}
+
+.quality_ul li select {
+    width: 100%;
+    height: 30px;
+}
+
+li, ul {
+    margin: 0;
+    padding: 0;
+}
+
+.padding_left {
+    padding-left: 0;
+}
+
+h1 {
+    font-size: 18px;
+    margin: 7px 0;
+}
+
+.border_bottom {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+
+.down_box_bg {
+    background-color: rgb(254, 254, 254);
+}
+
+.border {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+}
+
+.col-md-6 {
+    width: 49%;
+}
+
+.no_margin_left {
+    margin-left: 0 !important;
+}
+
+.margin_left {
+    margin-left: 2% !important;
+}
+
+.maring_bottom {
+    margin-bottom: 9px;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+@media screen and (max-width: 1000px) {
+    .tab_width {
+        width: 100%;
+        margin: auto !important;
     }
+
+    .quality_ul li select {
+        height: 22px;
+    }
+
 }
 
-.main .page-header {
-    margin-top: 0;
+@media screen and (max-width: 400px) {
+    .col-md-6 {
+        width: 100% !important;
+    }
+
+    .col-xs-12 {
+        width: 100%;
+    }
+
+    .margin_left {
+        margin-left: 0 !important;
+        margin-top: 5px;
+    }
+
+}
+
+.feedback {
+    height: 50px;
+}
+
+.exercise-header {
+    /*font-size: 18px;*/
 }

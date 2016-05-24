@@ -2,7 +2,8 @@ from flask import Flask
 from flask_security import SQLAlchemyUserDatastore
 
 from .accounts.models import User, Role
-from .core import bootstrap, db, security, mail
+from .core import bootstrap, db, security, mail, webpack
+from .api.endpoints import api
 from .dashboard.views import dashboard
 from .grader.views import grader
 from .redis_session import RedisSessionInterface
@@ -25,6 +26,7 @@ def create_app(package_name, package_path, settings=None):
                       register_blueprint=True)
     bootstrap.init_app(app)
     mail.init_app(app)
+    webpack.init_app(app)
 
     # attach redis sessions
     app.session_interface = RedisSessionInterface()
@@ -32,5 +34,6 @@ def create_app(package_name, package_path, settings=None):
     # register main blueprints
     app.register_blueprint(dashboard)
     app.register_blueprint(grader)
+    app.register_blueprint(api)
 
     return app

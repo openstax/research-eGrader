@@ -7,7 +7,7 @@ from flask.ext.security import current_user
 from eGrader.grader.forms import GraderForm
 from ..core import db
 
-from .models import Exercise, Response, ResponseGrade, get_next_response, get_next_exercise
+from .models import Exercise, Response, ResponseGrade, get_next_response, get_next_exercise_id
 
 grader = Blueprint('grader',
                    __name__,
@@ -20,7 +20,7 @@ def _get_exercise_response():
     if 'exercise' in session and session['exercise']:
         exercise = session['exercise']
     else:
-        exercise = get_next_exercise(user_id)
+        exercise = get_next_exercise_id(user_id)
         print ('Printing exercise_id!', exercise['id'])
 
     if 'response' in session and session['response']:
@@ -35,9 +35,20 @@ def _get_exercise_response():
     return exercise, response
 
 
-@grader.route('/', methods=['GET', 'POST'])
+@grader.route('/', methods=['GET'])
 @login_required
-def grade_next_response():
+def index():
+    exercise_id = get_next_exercise_id(current_user.id)
+
+    return render_template('grader_index.html',
+                           exercise_id=exercise_id,
+                           user_id=current_user.id)
+
+
+
+@grader.route('/old', methods=['GET', 'POST'])
+@login_required
+def old():
     # In this case, `exercise` is a dictionary and response is a Model Class. Some extra work was done on
     # exercise to make it easier to work with.
     exercise, response = _get_exercise_response()
@@ -65,7 +76,8 @@ def grade_next_response():
     form.feedback.choices = exercise['feedback_choices']
     form.response_id.data = response.id
 
-    return render_template('grader_index.html', form=form,
+    return render_template('old_index.html', form=form,
                            exercise=exercise,
                            free_response = free_response)
+
 
