@@ -1,7 +1,13 @@
+from datetime import datetime
 from flask import abort, Blueprint, jsonify, request
 
 from eGrader.core import db
-from eGrader.grader.models import get_next_exercise_id, get_parsed_exercise, Response, ResponseGrade
+from eGrader.grader.models import (get_next_exercise_id,
+                                   get_parsed_exercise,
+                                   Response,
+                                   ResponseGrade,
+                                   UserGradingSession)
+
 
 api = Blueprint('api',
                 __name__,
@@ -57,7 +63,9 @@ def submit_grader_response():
         score=posted['score'] if 'score' in posted else None,
         misconception = posted['misconception'] if 'misconception' in posted else None,
         junk = posted['quality'],
-        feedback_id = posted['feedback_id'] if posted['quality'] else None
+        feedback_id = posted['feedback_id'] if posted['quality'] else None,
+        submitted_on = datetime.utcnow(),
+        session_id = posted['session_id']
     )
     db.session.add(grade)
     db.session.commit()

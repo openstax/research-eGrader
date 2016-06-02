@@ -33,20 +33,28 @@ def reset_db():
 
 
 @manager.command
-def create_admin_user(password):
+def prepare_db():
+    from eGrader.tasks.prepare_response_matrix import load_exercise_features
+    load_exercise_features()
+    return
+
+
+@manager.option('-e', '--email', dest='email')
+@manager.option('-p', '--password', dest='password')
+def create_admin_user(email, password):
     user_datastore = app.extensions['security'].datastore
     user_datastore.find_or_create_role(name='admin',
                                        description='Administrator')
     encrypted_password = utils.encrypt_password(password)
 
-    if not user_datastore.get_user('admin@labs.openstax.org'):
-        user_datastore.create_user(email='admin@labs.openstax.org',
+    if not user_datastore.get_user(email):
+        user_datastore.create_user(email=email,
                                    active=True,
                                    registered_at=datetime.now(),
                                    confirmed_at=datetime.now(),
                                    password=encrypted_password)
     db.session.commit()
-    user_datastore.add_role_to_user('admin@labs.openstax.org', 'admin')
+    user_datastore.add_role_to_user(email, 'admin')
     db.session.commit()
 
 

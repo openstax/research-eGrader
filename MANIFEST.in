@@ -1,0 +1,9 @@
+exclude *.pyc .DS_Store .gitignore .noseids MANIFEST.in __pycache__ dist
+include requirements.txt
+include wsgi.py
+include setup.py
+include manage.py
+include webpack.config.js
+include package.json
+recursive-include migrations *
+recursive-include eGrader *.j2 *.py *.html *.txt *.png *.jpg *.css *.PNG *.JPG *.part *.js *.json *.eot *.svg *.ttf *.woff *.woff2

@@ -8,8 +8,8 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 // Development asset host, asset location and build output path.
 var publicHost = 'http://localhost:2992';
 var rootAssetPath = path.join(__dirname, 'eGrader/static');
-var cssAssetPath = path.join(__dirname, 'eGrader/static/css/style');
-var buildOutputPath = path.join(__dirname, 'eGrader/build/public');
+var cssAssetPath = path.join(__dirname, 'eGrader/static/css');
+var buildOutputPath = path.join(__dirname, 'eGrader/static/build/');
 
 module.exports = {
     context: path.join(__dirname, 'eGrader'),
@@ -19,10 +19,9 @@ module.exports = {
             rootAssetPath + '/js/app/main'
         ],
         app_css: [
-            cssAssetPath
+            cssAssetPath + '/style',
+            cssAssetPath + '/dashboard'
         ]
-
-        
     },
     output: {
         path: buildOutputPath,
@@ -36,7 +35,7 @@ module.exports = {
     module: {
         loaders: [
             {
-                test: /\.jsx?$/,
+                test: /\.js$/,
                 exclude: /(node_modules)/,
                 loader: 'babel',
                 query: {
@@ -57,7 +56,7 @@ module.exports = {
         ]
     },
     plugins: [
-        new ManifestRevisionPlugin(path.join('eGrader/build', 'manifest.json'), {
+        new ManifestRevisionPlugin(rootAssetPath + '/manifest.json', {
             rootAssetPath: rootAssetPath,
             ignorePaths: ['/css', '/js']
         }),

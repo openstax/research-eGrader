@@ -1,11 +1,13 @@
 import numpy as np
 
-from sqlalchemy import and_
+from sqlalchemy import and_, func
+from sqlalchemy.dialects.postgresql import ARRAY, JSON
+from sqlalchemy.sql.expression import extract, label
 
 from eGrader.algs.active_learning_minvar import train_random_forest, get_min_var_idx
 from eGrader.core import db
 
-from sqlalchemy.dialects.postgresql import ARRAY, JSON
+
 
 from eGrader.utils import JsonSerializer
 
@@ -104,9 +106,26 @@ def get_parsed_exercise(exercise_id):
                 )
 
 
+def get_grading_session_metrics(user_id):
+    subq = db.session.query(ResponseGrade.session_id.label('session_id'),
+                            func.count(ResponseGrade.id).label('responses_graded'),
+                            label('time_grading', UserGradingSession.ended_on - UserGradingSession.started_on)) \
+        .join(UserGradingSession) \
+        .filter(UserGradingSession.user_id == user_id) \
+        .group_by(ResponseGrade.session_id,
+                  UserGradingSession.started_on,
+                  UserGradingSession.ended_on).subquery()
+
+    query = db.session.query(func.count(subq.c.session_id),
+                             func.sum(subq.c.responses_graded),
+                             extract('EPOCH', func.sum(subq.c.time_grading)))
+
+    return query.all()[0]
+
+
 class Response(db.Model, JsonSerializer):
     __tablename__ = 'responses'
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True)  # The corresponding columns in the spreadsheet
     external_id = db.Column(db.Integer())           # X.1
     deidentifier = db.Column(db.String())           # Deidentifier
     free_response = db.Column(db.Text())            # Free.Response
@@ -160,6 +179,8 @@ class ResponseGrade(db.Model):
     misconception = db.Column(db.Boolean())
     junk = db.Column(db.Boolean())
     feedback_id = db.Column(db.Integer())
+    submitted_on = db.Column(db.DateTime())
+    session_id = db.Column(db.Integer(), db.ForeignKey('user_grading_sessions.id'))
 
     @classmethod
     def get_grades(cls, user_id, exercise_id):
@@ -167,3 +188,36 @@ class ResponseGrade(db.Model):
             .outerjoin(cls, and_(cls.response_id == Response.id, cls.user_id == user_id))\
             .filter(Response.exercise_id == exercise_id)
         return query.all()
+
+    @classmethod
+    def by_user_id(cls, user_id):
+        return db.session.query(cls).filter(cls.user_id == user_id).all()
+
+
+class ExerciseNotes(db.Model, JsonSerializer):
+    __tablename__ = 'user_exercise_notes'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    exercise_id = db.Column(db.Integer(), db.ForeignKey('exercises.id'))
+    text = db.Column(db.Text())
+
+
+class UserGradingSession(db.Model, JsonSerializer):
+    __tablename__ = 'user_grading_sessions'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    started_on = db.Column(db.DateTime())
+    ended_on = db.Column(db.DateTime())
+
+    @classmethod
+    def by_user_id(cls, user_id):
+        return db.session.query(cls).filter(cls.user_id == user_id).all()
+
+
+    @classmethod
+    def latest(cls, user_id):
+        return db.session.query(cls)\
+            .filter(cls.user_id == user_id)\
+            .filter(cls.ended_on != None)\
+            .order_by(cls.ended_on.desc())\
+            .first()

@@ -1,4 +1,5 @@
 
+import sys
 import sqlalchemy as db
 from sqlalchemy.dialects.postgresql import ARRAY
 
@@ -9,11 +10,15 @@ from eGrader.utils import Executor
 from eGrader.algs.parse_responses import parse_responses
 from eGrader.algs.WordUtility import WordUtility
 
-app = create_app()
-ctx = app.test_request_context()
-ctx.push()
+sys.path.append('/Users/mike/Projects/00_openstax/eGrader/eGrader/tasks')
+sys.path.append('/Users/mike/Projects/00_openstax/eGrader')
 
-executor = Executor(app.config['SQLALCHEMY_DATABASE_URI'], debug=True)
+app = create_app()
+
+app_config = app.config['SQLALCHEMY_DATABASE_URI']
+prod_config = 'postgresql+psycopg2://grader_admin:GVxFD23490JSFlLVx934jk@localhost:9994/egrader'
+
+executor = Executor(prod_config, debug=True)
 
 metadata = db.MetaData()
 
@@ -63,7 +68,7 @@ def get_exercise_responses(exercise_id):
 
 def load_exercise_features():
 
-    grading_parser = WordUtility(corpora_list=['../algs/word_files/all_plaintext.txt', '../algs/word_files/big.txt'],
+    grading_parser = WordUtility(corpora_list=['eGrader/algs/word_files/all_plaintext.txt', 'eGrader/algs/word_files/big.txt'],
                                  parse_args=(True, False, True, True, True))
 
     exercises = get_exercises()
@@ -81,3 +86,5 @@ def load_exercise_features():
     return
 
 
+if __name__ == '__main__':
+    load_exercise_features()

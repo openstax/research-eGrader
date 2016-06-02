@@ -49,7 +49,6 @@ class API {
         var submit;
         console.log(data);
         if (!(_.isEmpty(data))) {
-
             submit = $.ajax({
                 url: this.rootUrl + resource,
                 data: JSON.stringify(data),

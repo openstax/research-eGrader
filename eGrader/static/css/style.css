@@ -1,5 +1,15 @@
 body {
     padding-top: 50px;
+    font-size: 2em;
+    line-height: 1.5;
+    font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif;
+    color: #424242;
+}
+
+.text-style {
+    max-width: 34em;
+    margin: auto;
+    padding: 0 1em;
 }
 
 table {
@@ -8,6 +18,14 @@ table {
     border-spacing: 0;
     /*table-layout: fixed;*/
     width: 100%;
+}
+
+h1 {
+    font-size: 2.747em;
+}
+
+h2 {
+    font-size: 0.874em;
 }
 
 th {
@@ -105,9 +123,9 @@ h1 {
     border-radius: 2px;
 }
 
-.col-md-6 {
-    width: 49%;
-}
+/*.col-md-6 {*/
+    /*width: 49%;*/
+/*}*/
 
 .no_margin_left {
     margin-left: 0 !important;
@@ -159,4 +177,8 @@ h1 {
 
 .exercise-header {
     /*font-size: 18px;*/
+}
+
+.heading {
+    font-weight: bold;
 }

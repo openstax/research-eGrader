@@ -1,7 +1,12 @@
 from functools import wraps
 
 import sqlalchemy as db
-from .exceptions import api_error_handler
+from eGrader.exceptions import api_error_handler
+from sqlalchemy.sql.expression import extract
+
+
+def xtract(label, expr):
+    return extract('EPOCH', expr).label(label)
 
 
 class Executor(object):

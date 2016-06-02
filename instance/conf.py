@@ -9,4 +9,5 @@ LOG_PATH = '/var/www/log/labs-flask.log'
 SECRET_KEY = secret_settings.SECRET_KEY
 DEBUG = True
 MAIL_PASSWORD = secret_settings.MAIL_PASSWORD
-WEBPACK_MANIFEST_PATH = '../eGrader/build/manifest.json'
+WEBPACK_MANIFEST_PATH = '../eGrader/static/manifest.json'
+# WEBPACK_ASSETS_URL = 'http://127.0.0.1:5011/static/build/'

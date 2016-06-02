@@ -43,7 +43,7 @@
                             {{ free_response }}
                         </div>
                         <div class="grader-panel">
-                            <form action="{{ url_for('grader.grade_next_response') }}" method="post" id="grade-response-form">
+                            <form action="{{ url_for('grader.old') }}" method="post" id="grade-response-form">
                                 <fieldset class="form-group">
                                     <legend>Grade the Student's Response</legend>
                                     {{ form.csrf_token() }}
@@ -81,3 +81,35 @@
     </div>
 
 {% endblock content %}
+{% block scripts %}
+{{ super() }}
+<script>
+
+var timeout;
+
+function warning() {
+    timeout = setTimeout(function(){
+        alert('You stayed')
+    }, 1000);
+    return "You are leaving the page"
+}
+
+function noTimeout() {
+    clearTimeout(timeout);
+    var message = 'something';
+    $.ajax({
+        url: '/something',
+        data: {data: message},
+        async: false
+
+    })
+}
+
+window.onbeforeunload = warning;
+window.unload = noTimeout
+
+
+
+</script>
+
+{% endblock scripts %}

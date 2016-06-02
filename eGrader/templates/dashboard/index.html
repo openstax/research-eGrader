@@ -5,25 +5,34 @@
     <h1 class="page-header">Dashboard</h1>
     <div class="row placeholders">
             <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
+                <span class="total-responses dashboard">{{ data.total_responses }}</span>
+                <h4 class="text-muted">Total Responses Graded</h4>
             </div>
             <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
+                <span class="average-responses dashboard">{{ data.avg_graded_per_session | round }}</span>
+                <h4 class="text-muted">Responses per Session</h4>
+            </div>
+
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <span class="average-responses-hour dashboard">{{ data.response_grading_rate | round }}</span>
+                <h4 class="text-muted">Minutes Per Response</h4>
             </div>
             <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
+                <span class="responses-last-session dashboard">{{ data.total_time_grading | round }}</span>
+                <h4 class="text-muted">Total Minutes Grading</h4>
             </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-          </div>
+
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-12">
+            <a id="begin-grading" class="btn btn-lg btn-success begin-grading" href="{{ url_for('grader.index') }}">Begin Grading</a>
+        </div>
+
+    </div>
 
 {% endblock content %}
+
+{% block scripts %}
+    {{ super() }}
+
+{% endblock scripts %}
