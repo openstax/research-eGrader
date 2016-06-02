@@ -7,6 +7,8 @@ from eGrader.core import db
 
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
 
+from eGrader.utils import JsonSerializer
+
 
 def get_next_response(user_id, exercise_id):
     """
@@ -18,6 +20,8 @@ def get_next_response(user_id, exercise_id):
 
     Returns
     -------
+    response
+        The response object from a list of responses
 
     """
     # TODO: Finish docstring of get_next_response function
@@ -33,7 +37,7 @@ def get_next_response(user_id, exercise_id):
 
         return response
     else:
-        exercise = Exercise.get_by_id(exercise_id)
+        exercise = Exercise.get(exercise_id)
         responses = Response.all_by_exercise_id(exercise_id)
         forest_name = exercise.forest_name
         if forest_name:
@@ -52,15 +56,36 @@ def get_next_response(user_id, exercise_id):
         return responses[prediction_idx]
 
 
-def get_next_exercise(user_id):
+def get_next_exercise_id(user_id):
+    """
+    Get the next exercise with responses that the grader is able to grade.
+    Parameters
+    ----------
+    user_id:int
+        the id of the user
+
+    Returns
+    -------
+    exercise_id: int
+        the exercise id of the next exercise that has responses to grade
+    """
+    # Create a subquery of all responses graded by the user
     subquery = db.session.query(ResponseGrade.response_id)\
         .join(Response)\
         .filter(ResponseGrade.user_id == user_id).subquery()
-    query = db.session.query(Exercise).join(Response).filter(~Response.id.in_(subquery)).first()
+    # Return the first exercise that has responses not in the the subquery
+    ex_r = db.session.query(Exercise).join(Response).filter(~Response.id.in_(subquery)).first()
 
+    return ex_r.id
+
+
+def get_parsed_exercise(exercise_id):
     # Get the JSON exercise data from the exercise.data field
     # This is where the feedback, answers, and other info is located
-    e_data = query.data['questions'][0]
+
+    exercise = Exercise.get(exercise_id)
+
+    e_data = exercise.data['questions'][0]
 
     # Create a list for the feedback_choices
     feedback_choices = []
@@ -72,15 +97,14 @@ def get_next_exercise(user_id):
         if answer['correctness'] == '1.0':
             answer_html = answer['content_html']
 
-    exercise = dict(id=query.id,
-                    exercise_html= e_data['stem_html'],
-                    answer_html=answer_html,
-                    feedback_choices=feedback_choices
-                    )
-    return exercise
+    return dict(id=exercise.id,
+                exercise_html=e_data['stem_html'],
+                answer_html=answer_html,
+                feedback_choices=feedback_choices
+                )
 
 
-class Response(db.Model):
+class Response(db.Model, JsonSerializer):
     __tablename__ = 'responses'
     id = db.Column(db.Integer(), primary_key=True)
     external_id = db.Column(db.Integer())           # X.1
@@ -92,8 +116,8 @@ class Response(db.Model):
     exercise_id = db.Column(db.Integer(), db.ForeignKey('exercises.id'))
 
     @classmethod
-    def get_by_id(cls, id):
-        return db.session.query(cls).filter(cls.id == id).first()
+    def get(cls, response_id):
+        return db.session.query(cls).get(response_id)
 
     @classmethod
     def all_by_exercise_id(cls, exercise_id):
@@ -123,8 +147,8 @@ class Exercise(db.Model):
     forest_name = db.Column(db.String())
 
     @classmethod
-    def get_by_id(cls, id):
-        return db.session.query(cls).filter(cls.id == id).first()
+    def get(cls, exercise_id):
+        return db.session.query(cls).get(exercise_id)
 
 
 class ResponseGrade(db.Model):
