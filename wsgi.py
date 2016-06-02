@@ -1,6 +1,7 @@
 from eGrader import create_app
+from eGrader.core import socketio
 
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5011)
+    socketio.run(app, host='127.0.0.1', port=5011)

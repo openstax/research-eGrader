@@ -2,7 +2,7 @@ from flask import Flask
 from flask_security import SQLAlchemyUserDatastore
 
 from .accounts.models import User, Role
-from .core import bootstrap, db, security, mail, webpack
+from .core import bootstrap, db, security, mail, webpack, socketio
 from .api.endpoints import api
 from .dashboard.views import dashboard
 from .grader.views import grader
@@ -27,6 +27,7 @@ def create_app(package_name, package_path, settings=None):
     bootstrap.init_app(app)
     mail.init_app(app)
     webpack.init_app(app)
+    socketio.init_app(app)
 
     # attach redis sessions
     app.session_interface = RedisSessionInterface()

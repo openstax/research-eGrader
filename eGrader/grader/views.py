@@ -1,13 +1,22 @@
 import json
 
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, session, url_for
 from flask.ext.login import login_required
 from flask.ext.security import current_user
+from flask.ext.socketio import emit
 
 from eGrader.grader.forms import GraderForm
-from ..core import db
+from ..core import db, socketio
 
-from .models import Exercise, Response, ResponseGrade, get_next_response, get_next_exercise_id
+from .models import (Exercise,
+                     get_next_exercise_id,
+                     get_next_response,
+                     get_parsed_exercise,
+                     Response,
+                     ResponseGrade,
+                     UserGradingSession)
+
 
 grader = Blueprint('grader',
                    __name__,
@@ -15,19 +24,61 @@ grader = Blueprint('grader',
                    template_folder='../templates/grader')
 
 
+# Adding in some websockets to keep track of the user grading session
+@socketio.on('connect', namespace='/grader/soc')
+def grading_connect():
+    # Get the latest grading_session
+    # If the session is within 15 minutes of the last session return latest
+    # else create a new session
+    grading_session = UserGradingSession.latest(current_user.id)
+
+    if grading_session and (datetime.utcnow() - grading_session.ended_on).seconds < 900:
+        emit('connection', dict(session_id=grading_session.id))
+    else:
+        grading_session = UserGradingSession(
+            user_id = current_user.id,
+            started_on = datetime.utcnow()
+        )
+        db.session.add(grading_session)
+        db.session.commit()
+        emit('connection', dict(session_id=grading_session.id))
+    session['grading_session'] = grading_session
+    print('user {0} is grading'.format(current_user.id))
+
+
+@socketio.on('disconnect', namespace='/grader/soc')
+def grading_disconnect():
+    print('Client disconnected', request.sid)
+    grading_session = session['grading_session']
+    grading_session.ended_on = datetime.utcnow()
+    db.session.add(grading_session)
+    db.session.commit()
+
+
 def _get_exercise_response():
+    """
+    This is only used for the old form based input which was mainly for testing of algorithms
+
+    Returns
+    -------
+    exercise
+    response
+    """
     user_id = current_user.id
     if 'exercise' in session and session['exercise']:
         exercise = session['exercise']
+        exercise_id = session['exercise']['id']
     else:
-        exercise = get_next_exercise_id(user_id)
-        print ('Printing exercise_id!', exercise['id'])
+        exercise_id = get_next_exercise_id(user_id)
+        exercise = get_parsed_exercise(exercise_id)
+        session['exercise'] = exercise
+        print ('Printing exercise_id!', exercise_id)
 
     if 'response' in session and session['response']:
         response = session['response']
     else:
-        response = get_next_response(user_id, exercise['id'])
-        print ('Printing exercise_id!', exercise['id'])
+        response = get_next_response(user_id, exercise_id)
+        print ('Printing exercise_id!', exercise_id)
 
     if not response:
         _get_exercise_response()
@@ -45,12 +96,17 @@ def index():
                            user_id=current_user.id)
 
 
-
 @grader.route('/old', methods=['GET', 'POST'])
 @login_required
 def old():
-    # In this case, `exercise` is a dictionary and response is a Model Class. Some extra work was done on
-    # exercise to make it easier to work with.
+    """
+    This view is deprecated as it was only used to test javascript and algorithms. This
+    form allows you to submit responses simply using html forms and nothing more and is
+    not as sophisticated as `grader.index`
+    Returns
+    -------
+    template
+    """
     exercise, response = _get_exercise_response()
 
     form = GraderForm(request.form)

@@ -6,8 +6,9 @@ import API from './api.js'
 import getFormData from './utils.js'
 import Handlebars from 'handlebars'
 import {startMathJax, typesetMath} from './mathjax.js'
+import SocketManager from './socket.js'
 
-import selectric from 'selectric'
+window.$ = window.jQuery = $;
 
 var App = {
 
@@ -15,15 +16,19 @@ var App = {
         this.userId = userId;
         this.exerciseId = exerciseId;
 
-        this.activateEvents();
+        // setup interfaces
         this.API = new API();
+        this.socketManager = new SocketManager();
+        this.sessionId = this.socketManager.getSessionId();
+        console.log(this.sessionId);
+
+        this.activateEvents();
 
         // Load the exercise
         this.loadExercise(this.exerciseId);
         // Load the next response
         this.nextResponse(this.userId, this.exerciseId);
         startMathJax();
-
     },
 
     activateEvents() {
@@ -117,7 +122,6 @@ var App = {
                     .text(choice[1]));
         });
 
-
         typesetMath(document);
         activateFormWidget();
 
@@ -142,12 +146,12 @@ var App = {
         // inject the userId to the data as it's used by the 
         // backend to save.. maybe better placed in a hidden form field? 
         data['user_id'] = this.userId;
+        data['session_id'] = this.socketManager.getSessionId();
         
         let submit = this.API.submitGradedResponse(data)
             .done(function(r) {
                 // If successfull we need to get the next response
                 // If there is no more responses then get a new exercise
-                // TODO: Code the get next exercise part
                 console.log('Load the next response');
                 self.nextResponse(self.userId, self.exerciseId)
             })
