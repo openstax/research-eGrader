@@ -24,6 +24,7 @@
     "handlebars": "^4.0.5",
     "jquery": "^2.2.3",
     "manifest-revision-webpack-plugin": "^0.1.0",
+    "noty": "^2.3.8",
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.4.6",
     "style-loader": "^0.13.1",
