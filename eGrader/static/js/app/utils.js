@@ -5,7 +5,9 @@ function getFormData($form){
     let indexed_array = {};
 
     $.map(unindexed_array, function(n, i){
-        if (n['value']){
+        if (n['value'] == "null"){
+            indexed_array[n['name']] = null;
+        } else {
             indexed_array[n['name']] = n['value'];
         }
 

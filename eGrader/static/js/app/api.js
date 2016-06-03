@@ -62,6 +62,20 @@ class API {
         }
         return submit
     }
+    
+    submitUnqualifiedExercise(data) {
+        const resource = 'exercise/unqualified';
+        let response = $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: this.rootUrl + resource,
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data)
+        });
+        
+        return response
+        
+    }
 
 }
 

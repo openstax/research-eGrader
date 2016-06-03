@@ -1,5 +1,4 @@
 
-import sys
 import sqlalchemy as db
 from sqlalchemy.dialects.postgresql import ARRAY
 
@@ -10,15 +9,11 @@ from eGrader.utils import Executor
 from eGrader.algs.parse_responses import parse_responses
 from eGrader.algs.WordUtility import WordUtility
 
-sys.path.append('/Users/mike/Projects/00_openstax/eGrader/eGrader/tasks')
-sys.path.append('/Users/mike/Projects/00_openstax/eGrader')
-
 app = create_app()
 
 app_config = app.config['SQLALCHEMY_DATABASE_URI']
-prod_config = 'postgresql+psycopg2://grader_admin:GVxFD23490JSFlLVx934jk@localhost:9994/egrader'
 
-executor = Executor(prod_config, debug=True)
+executor = Executor(app_config, debug=True)
 
 metadata = db.MetaData()
 

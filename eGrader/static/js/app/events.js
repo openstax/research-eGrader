@@ -21,6 +21,7 @@ var activateFormWidget = function() {
         if (current_quality == 't') {
             // Junk   - hide other fields
             $(this).parent().parent().parent().next().hide();
+
         } else {
             // Not Junk  - show other fields
             $(this).parent().parent().parent().next().show();
@@ -32,4 +33,8 @@ var activateGraderSubmitButton = function(callback) {
     $('#graderSubmit').on('click', callback);
 };
 
-export {activateFormWidget, activateNoteWidget, activateGraderSubmitButton}
+var activateQualButton = function(callback) {
+    $('#qualButton').on('click', callback)
+};
+
+export {activateFormWidget, activateNoteWidget, activateGraderSubmitButton, activateQualButton}

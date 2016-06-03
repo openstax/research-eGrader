@@ -7,14 +7,13 @@ from sqlalchemy.sql.expression import extract, label
 from eGrader.algs.active_learning_minvar import train_random_forest, get_min_var_idx
 from eGrader.core import db
 
-
+from sqlalchemy.dialects.postgresql import ARRAY, JSON
 
 from eGrader.utils import JsonSerializer
 
 
 def get_next_response(user_id, exercise_id):
     """
-
     Parameters
     ----------
     user_id
@@ -72,11 +71,17 @@ def get_next_exercise_id(user_id):
         the exercise id of the next exercise that has responses to grade
     """
     # Create a subquery of all responses graded by the user
-    subquery = db.session.query(ResponseGrade.response_id)\
+    subq1 = db.session.query(ResponseGrade.response_id)\
         .join(Response)\
         .filter(ResponseGrade.user_id == user_id).subquery()
-    # Return the first exercise that has responses not in the the subquery
-    ex_r = db.session.query(Exercise).join(Response).filter(~Response.id.in_(subquery)).first()
+    subq2 = db.session.query(UserUnqualifiedExercise.exercise_id)\
+        .filter(UserGradingSession.user_id == user_id).subquery()
+    # Return the first exercise that has responses not yet graded and not set to unqualified
+    ex_r = db.session.query(Exercise)\
+        .join(Response)\
+        .filter(~Response.id.in_(subq1))\
+        .filter(~Exercise.id.in_(subq2))\
+        .first()
 
     return ex_r.id
 
@@ -133,6 +138,8 @@ class Response(db.Model, JsonSerializer):
     correct_answer_id = db.Column(db.Integer())     # Correct.Answer.Id
     exercise_type = db.Column(db.String())          # Exercise.type
     exercise_id = db.Column(db.Integer(), db.ForeignKey('exercises.id'))
+    subject = db.Column(db.String())
+    subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
 
     @classmethod
     def get(cls, response_id):
@@ -154,7 +161,7 @@ class Response(db.Model, JsonSerializer):
         return query.first()
 
 
-class Exercise(db.Model):
+class Exercise(db.Model, JsonSerializer):
     __tablename__ = 'exercises'
     id = db.Column(db.Integer(), primary_key=True)
     uid = db.Column(db.String(), unique=True)
@@ -164,6 +171,7 @@ class Exercise(db.Model):
     version = db.Column(db.Integer())
     features = db.Column(ARRAY(db.Integer()))
     forest_name = db.Column(db.String())
+    subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
 
     @classmethod
     def get(cls, exercise_id):
@@ -213,7 +221,6 @@ class UserGradingSession(db.Model, JsonSerializer):
     def by_user_id(cls, user_id):
         return db.session.query(cls).filter(cls.user_id == user_id).all()
 
-
     @classmethod
     def latest(cls, user_id):
         return db.session.query(cls)\
@@ -221,3 +228,17 @@ class UserGradingSession(db.Model, JsonSerializer):
             .filter(cls.ended_on != None)\
             .order_by(cls.ended_on.desc())\
             .first()
+
+
+class UserUnqualifiedExercise(db.Model, JsonSerializer):
+    __tablename__ = 'user_unqualified_exercises'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    exercise_id = db.Column(db.Integer(), db.ForeignKey('exercises.id'))
+
+
+class Subject(db.Model):
+    __tablename__ = 'subjects'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+    tag = db.Column(db.String())

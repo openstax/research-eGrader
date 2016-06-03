@@ -13,7 +13,8 @@ def index():
     # Number of Sessions, Number of Responses, Total time
     # [(3L, Decimal('13'), 5314.563611)]
     grading_session_metrics = get_grading_session_metrics(current_user.id)
-    if grading_session_metrics:
+    print(grading_session_metrics)
+    if grading_session_metrics[0]:
         total_responses = grading_session_metrics[1]
         total_sessions = grading_session_metrics[0]
 

@@ -2,11 +2,13 @@ from datetime import datetime
 from flask import abort, Blueprint, jsonify, request
 
 from eGrader.core import db
+
 from eGrader.grader.models import (get_next_exercise_id,
                                    get_parsed_exercise,
                                    Response,
                                    ResponseGrade,
-                                   UserGradingSession)
+                                   UserGradingSession,
+                                   UserUnqualifiedExercise)
 
 
 api = Blueprint('api',
@@ -71,3 +73,16 @@ def submit_grader_response():
     db.session.commit()
 
     return jsonify(dict(success=True, message='Response submitted'))
+
+
+@api.route('/exercise/unqualified', methods=['POST'])
+def not_qualified():
+    posted = request.get_json()
+    unqual = UserUnqualifiedExercise(
+        user_id = posted['user_id'],
+        exercise_id = posted['exercise_id']
+    )
+    db.session.add(unqual)
+    db.session.commit()
+
+    return jsonify(dict(success=True, message='Qualification submitted'))

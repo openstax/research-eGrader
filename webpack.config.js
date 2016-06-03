@@ -15,7 +15,7 @@ module.exports = {
     context: path.join(__dirname, 'eGrader'),
     entry: {
         app_js: [
-            'webpack/hot/dev-server',
+            // 'webpack/hot/dev-server',
             rootAssetPath + '/js/app/main'
         ],
         app_css: [

@@ -22,10 +22,10 @@
                 <div class="border_bg margin_bottom">
                     <div class="row">
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <button class="btn">Not qualified</button>
+                            <button id="qualButton" class="btn" onClick="window.App.submitUnqualifiedExercise()">Not qualified</button>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <button class="btn">Report Error</button>
+                            <a href="https://docs.google.com/a/rice.edu/forms/d/1AmwbFIRvZJ6F91PQp1I6jQgqM9Kc3qNMrHdLdqhj8FE/viewform" target="_blank"><button class="btn">Report Error</button></a>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
                             <button class="btn">View Reference</button>
@@ -124,8 +124,8 @@
                         <div class="row">
                             <div class="col-md-4 bold">Quality</div>
                                 <div class="col-md-8">
-                                    <select class="quality form-control" name="quality">
-                                        <option value="">---Select a quality option---</option>
+                                    <select required class="quality form-control" name="quality">
+                                        <option value="null">---Select a quality option---</option>
                                         <option value="t">Junk</option>
                                         <option value="f">Not Junk</option>
                                         </select>
@@ -137,8 +137,8 @@
                             <div class="row">
                                 <div class="col-md-4 bold">Score</div>
                                     <div class="col-md-8">
-                                        <select class="score form-control" name="score">
-                                            <option value="">---Select an option---</option>
+                                        <select required class="score form-control" name="score">
+                                            <option value="null">---Select an option---</option>
                                             <option value="0">No Credit</option>
                                             <option value="1">Full Credit</option>
                                             <option value="0.5">Partial Credit</option>
@@ -150,8 +150,8 @@
                             <div class="row">
                                 <div class="col-md-4 bold">Misconception?</div>
                                     <div class="col-md-8">
-                                        <select class="misconception form-control"name="misconception">
-                                            <option value="">---Select an option---</option>
+                                        <select required class="misconception form-control"name="misconception">
+                                            <option value="null">---Select an option---</option>
                                             <option value="t">Yes</option>
                                             <option value="f">No</option>
                                         </select>
@@ -162,16 +162,8 @@
                             <div class="row">
                                 <div class="col-md-4 bold">Feedback</div>
                                     <div class="col-md-8">
-                                        <select class="feedback form-control" name="feedback_id">
-                                            <option value="">---Select an option---</option>
-                                            <option value="1">"The original hypothesis is incorrect because the toaster may be broken or was not turned on."
-                                            </option>
-                                            <option value="2">The original hypothesis is incorrect because when the coffee maker was plugged in it worked. Therefore, it is incorrect to hypothesize that there is something wrong with the outlet. Alternative hypothesis includes that the toaster wasn’t turned on.
-                                            </option>
-                                            <option value="3">The coffee maker works when plugged into the outlet, but the toaster doesn’t. Alternative hypothesis includes that the toaster wasn’t turned on.
-                                            </option>
-                                            <option value="4">The coffee maker works in the mentioned situation but the toaster doesn’t. Alternative hypotheses suggests that the toaster might be broken or was not working.
-                                            </option>
+                                        <select required class="feedback form-control" name="feedback_id">
+                                            <option value="null">---Select an option---</option>
                                         </select>
                                     </div>
                             </div>
