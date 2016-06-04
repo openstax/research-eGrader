@@ -8,7 +8,7 @@ from eGrader.grader.models import (get_next_exercise_id,
                                    Response,
                                    ResponseGrade,
                                    UserGradingSession,
-                                   UserUnqualifiedExercise)
+                                   UserUnqualifiedExercise, ExerciseNote)
 
 
 api = Blueprint('api',
@@ -86,3 +86,33 @@ def not_qualified():
     db.session.commit()
 
     return jsonify(dict(success=True, message='Qualification submitted'))
+
+
+@api.route('/exercise/notes', methods=['GET'])
+def get_user_exercise_notes():
+    user_id = request.args.get('user_id', None)
+    exercise_id = request.args.get('exercise_id', None)
+    notes = ExerciseNote.get_by_user_id(user_id, exercise_id)
+    data = [{"id": note.id,
+             "text": note.text} for note in notes]
+    print data
+
+    if not notes:
+        return jsonify(dict(success=False, notes=[]))
+    else:
+        return jsonify(dict(success=True, notes=data))
+
+
+@api.route('/exercise/notes', methods=['POST'])
+def submit_note():
+    posted = request.get_json()
+    note = ExerciseNote(
+        user_id = posted['user_id'],
+        exercise_id = posted['exercise_id'],
+        text = posted['text'],
+        created_on = datetime.utcnow()
+    )
+    db.session.add(note)
+    db.session.commit()
+
+    return jsonify(dict(success=True, message='Note submitted', note=note.to_json()))

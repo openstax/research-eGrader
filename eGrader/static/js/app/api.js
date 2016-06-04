@@ -77,6 +77,33 @@ class API {
         
     }
 
+    submitNote(data) {
+        const resource = 'exercise/notes';
+        let response = $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: this.rootUrl + resource,
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data)
+        });
+
+        return response
+    }
+    
+    getNotes(userId, exerciseId) {
+        const resource = 'exercise/notes';
+        let response = $.ajax({
+            type: 'GET',
+            dataType: 'json',
+            url: this.rootUrl + resource,
+            data: {
+                user_id: userId,
+                exercise_id:exerciseId
+            }
+        });
+
+        return response
+    }
 }
 
 export default API

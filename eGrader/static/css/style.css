@@ -182,3 +182,15 @@ h1 {
 .heading {
     font-weight: bold;
 }
+
+.grader-buttons a {
+    color: inherit;
+}
+
+.grader-buttons .btn:hover {
+    color: dodgerblue;
+}
+
+.note-record {
+    padding-top: 5px;
+}

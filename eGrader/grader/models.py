@@ -215,12 +215,19 @@ class Exercise(db.Model, JsonSerializer):
         return db.session.query(cls).get(exercise_id)
 
 
-class ExerciseNotes(db.Model, JsonSerializer):
+class ExerciseNote(db.Model, JsonSerializer):
     __tablename__ = 'user_exercise_notes'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
     exercise_id = db.Column(db.Integer(), db.ForeignKey('exercises.id'))
     text = db.Column(db.Text())
+    created_on = db.Column(db.DateTime)
+
+    @classmethod
+    def get_by_user_id(cls, user_id, exercise_id):
+        return db.session.query(cls)\
+            .filter(cls.user_id == user_id, cls.exercise_id == exercise_id)\
+            .order_by(cls.created_on).all()
 
 
 class UserGradingSession(db.Model, JsonSerializer):

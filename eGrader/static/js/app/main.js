@@ -8,7 +8,7 @@ import getFormData from './utils.js'
 import Handlebars from 'handlebars'
 import {startMathJax, typesetMath} from './mathjax.js'
 import SocketManager from './socket.js'
-
+import Notes from './notes.js'
 
 window.$ = window.jQuery = $;
 
@@ -22,6 +22,8 @@ var App = {
         // setup interfaces
         this.API = new API();
         this.socketManager = new SocketManager();
+        this.Notes = new Notes(userId, exerciseId);
+
         this.sessionId = this.socketManager.getSessionId();
         console.log(this.sessionId);
 
@@ -78,6 +80,8 @@ var App = {
         $eText.html(r['exercise_html']);
         $eAnswer.html(r['answer_html']);
         this.feedbackChoices = r['feedback_choices']
+
+        this.Notes.loadNotes(this.userId, this.exerciseId)
 
     },
 
@@ -159,6 +163,17 @@ var App = {
             .fail(function(r) {
                 throw new Error('There was a problem trying to save the graded response')
             });
+        }
+
+    },
+    
+    addNote() {
+        let text = $('.notes-text').val();
+        if (text) {
+            console.log(text);
+            this.Notes.addNote(this.userId, this.exerciseId, text)
+        } else {
+            this.notifyError('Please input a value into the text area.')
         }
 
     },

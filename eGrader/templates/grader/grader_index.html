@@ -20,7 +20,7 @@
             <div class="col-xs-12 col-md-8 col-lg-8 ">
                 <!--lef side box-->
                 <div class="border_bg margin_bottom">
-                    <div class="row">
+                    <div class="row grader-buttons">
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
                             <button id="qualButton" class="btn" onClick="window.App.submitUnqualifiedExercise()">Not qualified</button>
                         </div>
@@ -82,18 +82,19 @@
 
     </div>
         <div class="col-xs-12 col-md-4 col-lg-4 " id="notes_box">
-                <form action="" method="post" id="notes" name="notes">
+                <form action="" method="post" id="notes_form" name="notes">
                     <div class="row border_bg tab_width">
                         <div class="notes-header heading">Notes</div>
                             <span>
 
-                                <textarea></textarea>
+                                <textarea class="notes-text"></textarea>
 
                             </span>
-                        <span><button type="submit" class="btn btn-success small_margin">Add Note</button></span>
+                        <span><button type="button" class="btn btn-success small_margin" onClick="window.App.addNote()">Add Note</button></span>
                         <div class="clear"></div>
                     </div>
                 </form>
+            <div class="note-ledger"></div>
             </div>
         </div>
 </div>
