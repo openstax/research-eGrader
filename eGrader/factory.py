@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_security import SQLAlchemyUserDatastore
 
+from eGrader.accounts.forms import ExtendedRegisterForm
 from .accounts.models import User, Role
 from .core import bootstrap, db, security, mail, webpack, socketio
 from .api.endpoints import api
@@ -23,7 +24,8 @@ def create_app(package_name, package_path, settings=None):
     db.init_app(app)
     security.init_app(app,
                       SQLAlchemyUserDatastore(db, User, Role),
-                      register_blueprint=True)
+                      register_blueprint=True,
+                      confirm_register_form=ExtendedRegisterForm)
     bootstrap.init_app(app)
     mail.init_app(app)
     webpack.init_app(app)

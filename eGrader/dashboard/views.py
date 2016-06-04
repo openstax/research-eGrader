@@ -1,7 +1,9 @@
+from datetime import datetime
 from flask import Blueprint, render_template
 from flask.ext.login import current_user
 from flask.ext.security import login_required
 
+from eGrader.core import db
 from eGrader.grader.models import ResponseGrade, UserGradingSession, get_grading_session_metrics
 
 dashboard = Blueprint('dashboard', __name__)
@@ -12,8 +14,16 @@ dashboard = Blueprint('dashboard', __name__)
 def index():
     # Number of Sessions, Number of Responses, Total time
     # [(3L, Decimal('13'), 5314.563611)]
+
+    last_session = UserGradingSession.latest_by_start(current_user.id)
+
+    if not last_session.ended_on:
+        last_session.ended_on = datetime.utcnow()
+        db.session.add(last_session)
+        db.session.commit()
+
     grading_session_metrics = get_grading_session_metrics(current_user.id)
-    print(grading_session_metrics)
+
     if grading_session_metrics[0]:
         total_responses = grading_session_metrics[1]
         total_sessions = grading_session_metrics[0]

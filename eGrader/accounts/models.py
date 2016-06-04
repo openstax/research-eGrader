@@ -39,12 +39,9 @@ class User(UserMixin, db.Model):
     current_login_ip = db.Column(db.String(100))
     login_count = db.Column(db.Integer)
     registered_at = db.Column(db.DateTime())
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
+    subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
 
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
-
-
-class UserProfile(db.Model):
-    id = db.Column(db.Integer(), primary_key=True)
-    first_name = db.Column(db.String(100))
-    last_name = db.Column(db.String(100))

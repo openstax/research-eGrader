@@ -28,13 +28,14 @@ def get_next_response(user_id, exercise_id):
     # TODO: Finish docstring of get_next_response function
 
     grades = ResponseGrade.get_grades(user_id, exercise_id)
-    print('Printing Grades: ',grades)
+    print('Printing Grades: ', grades)
 
     labels = [grade[1] for grade in grades]
     labels_array = np.array(labels, dtype=float)
 
+
     if all(v is None for v in labels):
-        response = Response.get_first_ungraded_response(user_id, exercise_id)
+        response = Response.get_random_ungraded_response(user_id, exercise_id)
 
         return response
     else:
@@ -53,13 +54,14 @@ def get_next_response(user_id, exercise_id):
             forest = train_random_forest(features[obs_idx], labels_array[obs_idx])
             print forest
             prediction_idx = get_min_var_idx(features, labels_array, forest)
-
+            print(responses[prediction_idx])
         return responses[prediction_idx]
 
 
-def get_next_exercise_id(user_id):
+def get_next_exercise_id(user_id, subject_id=None):
     """
     Get the next exercise with responses that the grader is able to grade.
+
     Parameters
     ----------
     user_id:int
@@ -70,20 +72,27 @@ def get_next_exercise_id(user_id):
     exercise_id: int
         the exercise id of the next exercise that has responses to grade
     """
-    # Create a subquery of all responses graded by the user
-    subq1 = db.session.query(ResponseGrade.response_id)\
-        .join(Response)\
-        .filter(ResponseGrade.user_id == user_id).subquery()
-    subq2 = db.session.query(UserUnqualifiedExercise.exercise_id)\
-        .filter(UserGradingSession.user_id == user_id).subquery()
-    # Return the first exercise that has responses not yet graded and not set to unqualified
-    ex_r = db.session.query(Exercise)\
-        .join(Response)\
-        .filter(~Response.id.in_(subq1))\
-        .filter(~Exercise.id.in_(subq2))\
-        .first()
 
-    return ex_r.id
+    # A list of responses graded by the user
+    subq1 = db.session.query(ResponseGrade.response_id) \
+        .filter(ResponseGrade.user_id == user_id).subquery()
+    # A list of exercise_ids the user is unqualified to grade
+    subq2 = db.session.query(UserUnqualifiedExercise.exercise_id) \
+        .filter(UserGradingSession.user_id == user_id).subquery()
+
+    # Return the first exercise that has responses not yet graded and not set to unqualified
+    query = db.session.query(Exercise) \
+        .join(Response) \
+        .filter(~Response.id.in_(subq1)) \
+        .filter(~Exercise.id.in_(subq2)) \
+        .order_by(func.random())
+
+    if subject_id:
+        query = query.filter(Exercise.subject_id == subject_id)
+
+    ex = query.first()
+
+    return ex.id
 
 
 def get_parsed_exercise(exercise_id):
@@ -128,56 +137,6 @@ def get_grading_session_metrics(user_id):
     return query.all()[0]
 
 
-class Response(db.Model, JsonSerializer):
-    __tablename__ = 'responses'
-    id = db.Column(db.Integer(), primary_key=True)  # The corresponding columns in the spreadsheet
-    external_id = db.Column(db.Integer())           # X.1
-    deidentifier = db.Column(db.String())           # Deidentifier
-    free_response = db.Column(db.Text())            # Free.Response
-    correct = db.Column(db.Boolean())               # Correct.
-    correct_answer_id = db.Column(db.Integer())     # Correct.Answer.Id
-    exercise_type = db.Column(db.String())          # Exercise.type
-    exercise_id = db.Column(db.Integer(), db.ForeignKey('exercises.id'))
-    subject = db.Column(db.String())
-    subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
-
-    @classmethod
-    def get(cls, response_id):
-        return db.session.query(cls).get(response_id)
-
-    @classmethod
-    def all_by_exercise_id(cls, exercise_id):
-        return db.session.query(cls)\
-            .filter(cls.exercise_id == exercise_id)\
-            .order_by(cls.id)\
-            .all()
-
-    @classmethod
-    def get_first_ungraded_response(cls, user_id, exercise_id):
-        subquery = db.session.query(ResponseGrade.response_id) \
-            .join(Response).filter(ResponseGrade.user_id == user_id).subquery()
-        query = db.session.query(Response).filter(Response.exercise_id == exercise_id) \
-            .filter(~Response.id.in_(subquery))
-        return query.first()
-
-
-class Exercise(db.Model, JsonSerializer):
-    __tablename__ = 'exercises'
-    id = db.Column(db.Integer(), primary_key=True)
-    uid = db.Column(db.String(), unique=True)
-    url = db.Column(db.String())
-    api_url = db.Column(db.String())  # API.URL
-    data = db.Column(JSON())
-    version = db.Column(db.Integer())
-    features = db.Column(ARRAY(db.Integer()))
-    forest_name = db.Column(db.String())
-    subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
-
-    @classmethod
-    def get(cls, exercise_id):
-        return db.session.query(cls).get(exercise_id)
-
-
 class ResponseGrade(db.Model):
     ___tablename__= 'response_grades'
     id = db.Column(db.Integer(), primary_key=True)
@@ -200,6 +159,60 @@ class ResponseGrade(db.Model):
     @classmethod
     def by_user_id(cls, user_id):
         return db.session.query(cls).filter(cls.user_id == user_id).all()
+
+
+class Response(db.Model, JsonSerializer):
+    __tablename__ = 'responses'
+    id = db.Column(db.Integer(), primary_key=True)  # The corresponding columns in the spreadsheet
+    external_id = db.Column(db.Integer())           # X.1
+    deidentifier = db.Column(db.String())           # Deidentifier
+    free_response = db.Column(db.Text())            # Free.Response
+    correct = db.Column(db.Boolean())               # Correct.
+    correct_answer_id = db.Column(db.Integer())     # Correct.Answer.Id
+    exercise_type = db.Column(db.String())          # Exercise.type
+    exercise_id = db.Column(db.Integer(), db.ForeignKey('exercises.id'))
+    subject = db.Column(db.String())
+    subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
+
+    grades = db.relationship('ResponseGrade')
+
+    @classmethod
+    def get(cls, response_id):
+        return db.session.query(cls).get(response_id)
+
+    @classmethod
+    def all_by_exercise_id(cls, exercise_id):
+        return db.session.query(cls)\
+            .filter(cls.exercise_id == exercise_id)\
+            .order_by(cls.id)\
+            .all()
+
+    @classmethod
+    def get_random_ungraded_response(cls, user_id, exercise_id):
+        subquery = db.session.query(ResponseGrade.response_id) \
+            .join(Response).filter(ResponseGrade.user_id == user_id).subquery()
+        query = db.session.query(Response).filter(Response.exercise_id == exercise_id) \
+            .filter(~Response.id.in_(subquery)).order_by(func.random())
+        return query.first()
+
+
+class Exercise(db.Model, JsonSerializer):
+    __tablename__ = 'exercises'
+    id = db.Column(db.Integer(), primary_key=True)
+    uid = db.Column(db.String(), unique=True)
+    url = db.Column(db.String())
+    api_url = db.Column(db.String())  # API.URL
+    data = db.Column(JSON())
+    version = db.Column(db.Integer())
+    features = db.Column(ARRAY(db.Integer()))
+    forest_name = db.Column(db.String())
+    subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
+
+    responses = db.relationship('Response')
+
+    @classmethod
+    def get(cls, exercise_id):
+        return db.session.query(cls).get(exercise_id)
 
 
 class ExerciseNotes(db.Model, JsonSerializer):
@@ -227,6 +240,14 @@ class UserGradingSession(db.Model, JsonSerializer):
             .filter(cls.user_id == user_id)\
             .filter(cls.ended_on != None)\
             .order_by(cls.ended_on.desc())\
+            .first()
+
+    @classmethod
+    def latest_by_start(cls, user_id):
+        return db.session.query(cls) \
+            .filter(cls.user_id == user_id) \
+            .filter(cls.ended_on != None) \
+            .order_by(cls.started_on.desc()) \
             .first()
 
 

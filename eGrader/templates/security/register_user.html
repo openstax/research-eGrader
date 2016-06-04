@@ -7,18 +7,21 @@ Openstax eGrader | Register
 {% endblock %}
 
 {% block form_content %}
-    <h2><small>Openstax Labs</small></h2>
+    <h2><small>Openstax eGrader</small></h2>
     <h1>Register<small><small>or <a href="{{ url_for('security.login') }}">Login</a></small></small></h1>
     <form action="{{ url_for('security.register') }}" method="POST" name="register_user_form">
         {{ register_user_form.hidden_tag() }}
 
         {{ wtf.form_errors(register_user_form) }}
+        {{ wtf.form_field(register_user_form.first_name) }}
+        {{ wtf.form_field(register_user_form.last_name) }}
+        {{ wtf.form_field(register_user_form.subject_id) }}
 
         {{ wtf.form_field(register_user_form.email) }}
         {{ wtf.form_field(register_user_form.password) }}
-        {% if register_user_form.password_confirm %}
-            {{ wtf.form_field(register_user_form.password_confirm) }}
-        {% endif %}
+{#        {% if register_user_form.password_confirm %}#}
+{#            {{ wtf.form_field(register_user_form.password_confirm) }}#}
+{#        {% endif %}#}
         {{ wtf.form_field(register_user_form.submit) }}
 
     </form>

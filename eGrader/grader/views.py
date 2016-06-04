@@ -89,7 +89,7 @@ def _get_exercise_response():
 @grader.route('/', methods=['GET'])
 @login_required
 def index():
-    exercise_id = get_next_exercise_id(current_user.id)
+    exercise_id = get_next_exercise_id(current_user.id, current_user.subject_id)
 
     return render_template('grader_index.html',
                            exercise_id=exercise_id,
