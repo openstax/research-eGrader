@@ -33,11 +33,17 @@ def reset_db():
 
 
 @manager.command
-def prepare_db():
+def load_exercise_features():
     from eGrader.tasks.prepare_response_matrix import load_exercise_features
     load_exercise_features()
     return
 
+@manager.command
+def load_subject_ids():
+    from eGrader.tasks.add_subject_ids import update_responses_with_subject, update_exercises_with_subject
+    update_exercises_with_subject()
+    update_responses_with_subject()
+    return
 
 @manager.option('-e', '--email', dest='email')
 @manager.option('-p', '--password', dest='password')
