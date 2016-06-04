@@ -124,7 +124,7 @@ h1 {
 }
 
 /*.col-md-6 {*/
-    /*width: 49%;*/
+/*width: 49%;*/
 /*}*/
 
 .no_margin_left {
@@ -194,3 +194,29 @@ h1 {
 .note-record {
     padding-top: 5px;
 }
+
+#idletimeout {
+    background: #a00003;
+    border: 3px solid #690f05;
+    color: #fff;
+    font-family: arial, sans-serif;
+    text-align: center;
+    font-size: 12px;
+    padding: 10px;
+    position: relative;
+    top: 0px;
+    left: 0;
+    right: 0;
+    z-index: 100000;
+    display: none;
+}
+
+#idletimeout a {
+    color: #fff;
+    font-weight: bold
+}
+
+#idletimeout span {
+    font-weight: bold
+}
+

@@ -3,7 +3,7 @@
 {% block styles %}
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    {{  stylesheet_tag('app_css') | safe }}
+    {{ stylesheet_tag('app_css') | safe }}
     <script src="//cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-MML-AM_HTMLorMML-full&amp;delayStartupUntil=configured"></script>
 
 {% endblock styles %}
@@ -13,6 +13,11 @@
 {% endblock navbar %}
 
 {% block content %}
+    <div id="idletimeout">
+        You will be logged off in <span><!-- countdown place holder --></span>&nbsp;seconds due to inactivity.
+        <a id="idletimeout-resume" href="#">Click here to continue grading</a>.
+    </div>
+
 
     <div class="container">
         <div class="row">
@@ -22,10 +27,15 @@
                 <div class="border_bg margin_bottom">
                     <div class="row grader-buttons">
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <button id="qualButton" class="btn" onClick="window.App.submitUnqualifiedExercise()">Not qualified</button>
+                            <button id="qualButton" class="btn" onClick="window.App.submitUnqualifiedExercise()">Not
+                                qualified
+                            </button>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <a href="https://docs.google.com/a/rice.edu/forms/d/1AmwbFIRvZJ6F91PQp1I6jQgqM9Kc3qNMrHdLdqhj8FE/viewform" target="_blank"><button class="btn">Report Error</button></a>
+                            <a href="https://docs.google.com/a/rice.edu/forms/d/1AmwbFIRvZJ6F91PQp1I6jQgqM9Kc3qNMrHdLdqhj8FE/viewform"
+                               target="_blank">
+                                <button class="btn">Report Error</button>
+                            </a>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
                             <button class="btn">View Reference</button>
@@ -42,7 +52,7 @@
                         </div>
 
                         <div class="col-lg-12 small_margin border padding_small">
-                              <span class="exercise-header heading">Correct Answer:</span>
+                            <span class="exercise-header heading">Correct Answer:</span>
                             <div class="exercise-answer text-style">Exercise Answer Text Here</div>
                         </div>
                     </div>
@@ -52,36 +62,34 @@
 
                 <!--STUDENT RESPONSE-->
 
-                    <div class="row">
-                        <div class="col-xs-12 col-md-12 col-lg-12 ">
-                            <div class="row  small_margin">
-                                <!--down box left-->
-                                <div class="col-md-12 col-xs-12 border_bg no_margin_left ">
+                <div class="row">
+                    <div class="col-xs-12 col-md-12 col-lg-12 ">
+                        <div class="row  small_margin">
+                            <!--down box left-->
+                            <div class="col-md-12 col-xs-12 border_bg no_margin_left ">
 
-                                    <div class="border padding_small">
-                                        <div class="stu-response text-style">STUDENT RESPONSE HERE</div>
-                                    </div>
+                                <div class="border padding_small">
+                                    <div class="stu-response text-style">STUDENT RESPONSE HERE</div>
+                                </div>
 
-                                    <div class="row">
-                                        <div class="col-md-12 ">
-                                            <div class="grader-form-container">
-                                                <!-- THE GRADER FORM IS INSERTED HERE -->
-                                            </div>
+                                <div class="row">
+                                    <div class="col-md-12 ">
+                                        <div class="grader-form-container">
+                                            <!-- THE GRADER FORM IS INSERTED HERE -->
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
-            <!--right box-->
+                </div>
+
+                <!--right box-->
 
 
-
-
-    </div>
-        <div class="col-xs-12 col-md-4 col-lg-4 " id="notes_box">
+            </div>
+            <div class="col-xs-12 col-md-4 col-lg-4 " id="notes_box">
                 <form action="" method="post" id="notes_form" name="notes">
                     <div class="row border_bg tab_width">
                         <div class="notes-header heading">Notes</div>
@@ -94,10 +102,10 @@
                         <div class="clear"></div>
                     </div>
                 </form>
-            <div class="note-ledger"></div>
+                <div class="note-ledger"></div>
             </div>
         </div>
-</div>
+    </div>
 
 {% endblock content %}
 
@@ -108,74 +116,96 @@
         const userId = {{ user_id }};
         let exerciseId = {{ exercise_id }};
 
-        document.addEventListener("DOMContentLoaded", function(event) {
+        document.addEventListener("DOMContentLoaded", function (event) {
             window.App.start(userId, exerciseId);
 
         });
 
     </script>
+    <script src="{{ url_for('static', filename='js/lib/jquery.idletimer.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/lib/jquery.idletimeout.js') }}" type="text/javascript"></script>
+    <script type="text/javascript">
+        $.idleTimeout('#idletimeout', '#idletimeout a', {
+            idleAfter: 5,
+            onTimeout: function () {
+                $(this).slideUp();
+                window.location = "{{ url_for('dashboard.index') }}";
+            },
+            onIdle: function () {
+                $(this).slideDown(); // show the warning bar
+            },
+            onCountdown: function (counter) {
+                $(this).find("span").html(counter); // update the counter
+            },
+            onResume: function () {
+                $(this).slideUp(); // hide the warning bar
+            }
+        });
+    </script>
+
+
     {% raw %}
     <script id="grader-form-template" type="text/x-handlebars-template">
 
         <form id="grader-response" name="grader-response">
-            <input type="hidden" id="responseId" name="responseId" value="" />
+            <input type="hidden" id="responseId" name="responseId" value=""/>
 
-                <ul class="quality_ul">
+            <ul class="quality_ul">
+                <li>
+                    <div class="row">
+                        <div class="col-md-4 bold">Quality</div>
+                        <div class="col-md-8">
+                            <select required class="quality form-control" name="quality">
+                                <option value="null">---Select a quality option---</option>
+                                <option value="t">Junk</option>
+                                <option value="f">Not Junk</option>
+                            </select>
+                        </div>
+                    </div>
+                </li>
+                <div class="extra_options">
                     <li>
                         <div class="row">
-                            <div class="col-md-4 bold">Quality</div>
-                                <div class="col-md-8">
-                                    <select required class="quality form-control" name="quality">
-                                        <option value="null">---Select a quality option---</option>
-                                        <option value="t">Junk</option>
-                                        <option value="f">Not Junk</option>
-                                        </select>
-                                </div>
+                            <div class="col-md-4 bold">Score</div>
+                            <div class="col-md-8">
+                                <select required class="score form-control" name="score">
+                                    <option value="null">---Select an option---</option>
+                                    <option value="0">No Credit</option>
+                                    <option value="1">Full Credit</option>
+                                    <option value="0.5">Partial Credit</option>
+                                </select>
+                            </div>
                         </div>
                     </li>
-                    <div class="extra_options">
-                        <li>
-                            <div class="row">
-                                <div class="col-md-4 bold">Score</div>
-                                    <div class="col-md-8">
-                                        <select required class="score form-control" name="score">
-                                            <option value="null">---Select an option---</option>
-                                            <option value="0">No Credit</option>
-                                            <option value="1">Full Credit</option>
-                                            <option value="0.5">Partial Credit</option>
-                                        </select>
-                                    </div>
+                    <li>
+                        <div class="row">
+                            <div class="col-md-4 bold">Misconception?</div>
+                            <div class="col-md-8">
+                                <select required class="misconception form-control" name="misconception">
+                                    <option value="null">---Select an option---</option>
+                                    <option value="t">Yes</option>
+                                    <option value="f">No</option>
+                                </select>
                             </div>
-                        </li>
-                        <li>
-                            <div class="row">
-                                <div class="col-md-4 bold">Misconception?</div>
-                                    <div class="col-md-8">
-                                        <select required class="misconception form-control"name="misconception">
-                                            <option value="null">---Select an option---</option>
-                                            <option value="t">Yes</option>
-                                            <option value="f">No</option>
-                                        </select>
-                                    </div>
-                                </div>
-                        </li>
-                        <li>
-                            <div class="row">
-                                <div class="col-md-4 bold">Feedback</div>
-                                    <div class="col-md-8">
-                                        <select required class="feedback form-control" name="feedback_id">
-                                            <option value="null">---Select an option---</option>
-                                        </select>
-                                    </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="row">
+                            <div class="col-md-4 bold">Feedback</div>
+                            <div class="col-md-8">
+                                <select required class="feedback form-control" name="feedback_id">
+                                    <option value="null">---Select an option---</option>
+                                </select>
                             </div>
-                        </li>
-                    </div>
-                </ul>
-        <div class="clear"></div>
-        <button type="button" id="graderSubmit" class="btn btn-success small_margin">Submit</button>
-    </form>
+                        </div>
+                    </li>
+                </div>
+            </ul>
+            <div class="clear"></div>
+            <button type="button" id="graderSubmit" class="btn btn-success small_margin">Submit</button>
+        </form>
     </script>
-{% endraw %}
+    {% endraw %}
 
 
 

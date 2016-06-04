@@ -3,12 +3,13 @@ from flask import abort, Blueprint, jsonify, request
 
 from eGrader.core import db
 
-from eGrader.grader.models import (get_next_exercise_id,
+from eGrader.grader.models import (ExerciseNote,
+                                   get_next_exercise_id,
                                    get_parsed_exercise,
                                    Response,
                                    ResponseGrade,
                                    UserGradingSession,
-                                   UserUnqualifiedExercise, ExerciseNote)
+                                   UserUnqualifiedExercise)
 
 
 api = Blueprint('api',
@@ -95,7 +96,6 @@ def get_user_exercise_notes():
     notes = ExerciseNote.get_by_user_id(user_id, exercise_id)
     data = [{"id": note.id,
              "text": note.text} for note in notes]
-    print data
 
     if not notes:
         return jsonify(dict(success=False, notes=[]))
@@ -112,6 +112,7 @@ def submit_note():
         text = posted['text'],
         created_on = datetime.utcnow()
     )
+
     db.session.add(note)
     db.session.commit()
 
