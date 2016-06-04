@@ -17,6 +17,12 @@
                 <li>
                     <a href="#">Help</a>
                 </li>
+                {% if current_user.is_authenticated %}
+                <li>
+                    <a href="{{ url_for('security.logout') }}">Logout</a>
+                </li>
+                {% endif %}
+
             </ul>
         </div>
     </div>
