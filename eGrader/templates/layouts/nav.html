@@ -22,7 +22,11 @@
                     <a href="{{ url_for('security.logout') }}">Logout</a>
                 </li>
                 {% endif %}
-
+                {% if current_user.has_role('admin') %}
+                <li>
+                    <a href="">Admin</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>
