@@ -18,7 +18,7 @@ var activateFormWidget = function() {
     $('.quality').on('change', function() {
         var current_quality = $(this).val();
         console.log(current_quality);
-        if (current_quality == 't') {
+        if (current_quality == 't' || current_quality == 'null') {
             // Junk   - hide other fields
             $(this).parent().parent().parent().next().hide();
 

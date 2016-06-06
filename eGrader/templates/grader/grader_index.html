@@ -126,7 +126,7 @@
     <script src="{{ url_for('static', filename='js/lib/jquery.idletimeout.js') }}" type="text/javascript"></script>
     <script type="text/javascript">
         $.idleTimeout('#idletimeout', '#idletimeout a', {
-            idleAfter: 5,
+            idleAfter: 15 * 60,
             onTimeout: function () {
                 $(this).slideUp();
                 window.location = "{{ url_for('dashboard.index') }}";

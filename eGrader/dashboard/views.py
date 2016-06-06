@@ -17,7 +17,8 @@ def index():
 
     last_session = UserGradingSession.latest_by_start(current_user.id)
 
-    if not last_session.ended_on:
+    if last_session and not last_session.ended_on:
+        # TODO: Get the last response graded and use that timestamp
         last_session.ended_on = datetime.utcnow()
         db.session.add(last_session)
         db.session.commit()
@@ -27,13 +28,20 @@ def index():
     if grading_session_metrics[0]:
         total_responses = grading_session_metrics[1]
         total_sessions = grading_session_metrics[0]
-
-        data = dict(
-            total_responses=total_responses,
-            avg_graded_per_session=total_responses / total_sessions,
-            total_time_grading=grading_session_metrics[2] / 60,
-            response_grading_rate=(int(grading_session_metrics[2] / 60) / total_responses)
-        )
+        try:
+            data = dict(
+                total_responses=total_responses,
+                avg_graded_per_session=total_responses / total_sessions,
+                total_time_grading=grading_session_metrics[2] / 60,
+                response_grading_rate=(int(grading_session_metrics[2] / 60) / total_responses)
+            )
+        except Exception:
+            data = dict(
+                total_responses=0,
+                avg_graded_per_session=0,
+                total_time_grading=0,
+                response_grading_rate=0
+            )
     else:
         data = dict(
             total_responses=0,
