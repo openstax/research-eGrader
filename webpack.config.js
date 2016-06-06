@@ -36,7 +36,7 @@ module.exports = {
         loaders: [
             {
                 test: /\.js$/,
-                exclude: /(node_modules)/,
+                exclude: [/(node_modules)/, /(build)/],
                 loader: 'babel',
                 query: {
                     presets: ['es2015']
@@ -58,7 +58,7 @@ module.exports = {
     plugins: [
         new ManifestRevisionPlugin(rootAssetPath + '/manifest.json', {
             rootAssetPath: rootAssetPath,
-            ignorePaths: ['/css', '/js']
+            ignorePaths: ['/css', '/js', '/images', '/pdf', '/build', 'manifest.json']
         }),
         new ExtractTextPlugin('[name].[chunkhash].css')
     ]
