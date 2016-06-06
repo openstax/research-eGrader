@@ -15,7 +15,7 @@
                     <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
                 </li>
                 <li>
-                    <a href="#">Help</a>
+                    <a href="{{ url_for('static', filename='pdf/orientationdocument.pdf') }}" target="_blank">Help</a>
                 </li>
                 {% if current_user.is_authenticated %}
                 <li>
