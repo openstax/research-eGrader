@@ -64,6 +64,25 @@ def create_admin_user(email, password):
     db.session.commit()
 
 
+@manager.option('-e', '--email', dest='email')
+@manager.option('-p', '--password', dest='password')
+@manager.option('-s', '--subject_id', dest='subject_id')
+def create_user(email, password, subject_id):
+
+    user_datastore = app.extensions['security'].datastore
+
+    encrypted_password = utils.encrypt_password(password)
+
+    if not user_datastore.get_user(email):
+        user_datastore.create_user(email=email,
+                                   active=True,
+                                   registered_at=datetime.now(),
+                                   confirmed_at=datetime.now(),
+                                   password=encrypted_password,
+                                   subject_id=subject_id)
+    db.session.commit()
+
+
 @manager.command
 def send_test_email():
     from flask.ext.mail import Message
