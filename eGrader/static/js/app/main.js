@@ -5,7 +5,7 @@ import noty from 'noty'
 import {activateFormWidget, activateNoteWidget, activateGraderSubmitButton, activateQualButton} from './events.js'
 import API from './api.js'
 import getFormData from './utils.js'
-import Handlebars from 'handlebars'
+// import Handlebars from 'handlebars'
 import {startMathJax, typesetMath} from './mathjax.js'
 import SocketManager from './socket.js'
 import Notes from './notes.js'
@@ -134,7 +134,7 @@ var App = {
     loadGraderForm(feedbackChoices) {
         let $container = $('.grader-form-container');
         let source = $('#grader-form-template').html();
-        let template = Handlebars.compile(source);
+        let template = _.template(source);
         $container.empty();
         $container.html(template());
 
