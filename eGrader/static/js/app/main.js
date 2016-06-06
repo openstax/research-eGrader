@@ -48,7 +48,9 @@ var App = {
                 let exerciseId = r['exercise_id'];
                 self.exerciseId = exerciseId;
                 self.loadExercise(exerciseId);
-                console.log(exerciseId);
+                self.notifyInformation('New Exercise Loaded!');
+                //console.log(exerciseId);
+
             })
             .fail(function(r) {
                 throw new Error('There was a problem retrieving an exercise from the API')
@@ -79,7 +81,7 @@ var App = {
 
         $eText.html(r['exercise_html']);
         $eAnswer.html(r['answer_html']);
-        this.feedbackChoices = r['feedback_choices']
+        this.feedbackChoices = r['feedback_choices'];
 
         this.Notes.loadNotes(this.userId, this.exerciseId)
 
@@ -155,10 +157,11 @@ var App = {
         if (valid) {
             let submit = this.API.submitGradedResponse(data)
             .done(function(r) {
-                // If successfull we need to get the next response
-                // If there is no more responses then get a new exercise
+                // If successful we need to get the next response
+                // If there are no more responses then get a new exercise
                 console.log('Load the next response');
-                self.nextResponse(self.userId, self.exerciseId)
+                self.nextResponse(self.userId, self.exerciseId);
+                self.notifySuccess('Grade submitted!')
             })
             .fail(function(r) {
                 throw new Error('There was a problem trying to save the graded response')
@@ -189,7 +192,8 @@ var App = {
         let submit = this.API.submitUnqualifiedExercise(data)
             .done(function(r) {
                 console.log('Submitted Qualification');
-                self.getNextExercise()
+                self.getNextExercise();
+                self.notifyInformation('Qualification Submitted!')
             })
             .fail(function(r) {
                 throw new Error('There was a problem trying to save the qualification')
@@ -215,6 +219,16 @@ var App = {
       timeout: 3000 
     });
   },
+
+    notifyInformation(message) {
+        new noty({
+            text: message,
+            layout: 'topRight',
+            theme: 'relax',
+            type: 'information',
+            timeout: 3000
+        })
+    },
 
     validateForm(data) {
         console.log(data);
