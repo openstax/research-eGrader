@@ -49,7 +49,7 @@ def next_response():
     exercise_id = request.args.get('exercise_id', None)
     try:
         response = get_next_response(user_id, exercise_id)
-    except Exception:
+    except ValueError:
         return jsonify(dict(
             message='There are no more responses available for that exercise',
             success=False))

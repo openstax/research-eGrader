@@ -220,3 +220,18 @@ h1 {
     font-weight: bold
 }
 
+.loader {
+    display: none;
+}
+
+.loader .progress-bar {
+    width: 100%;
+}
+
+.loading .loader {
+    display: block;
+}
+
+.loading .qcontent {
+    display: none;
+}

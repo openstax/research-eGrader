@@ -2,7 +2,7 @@ import numpy as np
 
 from sqlalchemy import and_, func
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
-from sqlalchemy.sql.expression import extract, label
+from sqlalchemy.sql.expression import distinct, extract, label
 
 from eGrader.algs.active_learning_minvar import train_random_forest, get_min_var_idx
 from eGrader.core import db
@@ -28,11 +28,11 @@ def get_next_response(user_id, exercise_id):
     # TODO: Finish docstring of get_next_response function
 
     grades = ResponseGrade.get_grades(user_id, exercise_id)
+    print ('The amount of grades', len(grades))
     print('Printing Grades: ', grades)
 
     labels = [grade[1] for grade in grades]
     labels_array = np.array(labels, dtype=float)
-
 
     if all(v is None for v in labels):
         response = Response.get_random_ungraded_response(user_id, exercise_id)
@@ -58,7 +58,7 @@ def get_next_response(user_id, exercise_id):
         return responses[prediction_idx]
 
 
-def get_next_exercise_id(user_id, subject_id=None):
+def get_next_exercise_id(user_id, subject_id=None, random=True):
     """
     Get the next exercise with responses that the grader is able to grade.
 
@@ -85,7 +85,12 @@ def get_next_exercise_id(user_id, subject_id=None):
         .join(Response) \
         .filter(~Response.id.in_(subq1)) \
         .filter(~Exercise.id.in_(subq2)) \
-        .order_by(func.random())
+
+    if random:
+        query = query.order_by(func.random())
+    else:
+        query = query.order_by(Exercise.id)
+        print('Getting exercise in order')
 
     if subject_id:
         query = query.filter(Exercise.subject_id == subject_id)
@@ -151,9 +156,9 @@ class ResponseGrade(db.Model):
 
     @classmethod
     def get_grades(cls, user_id, exercise_id):
-        query = db.session.query(Response.id, cls.junk)\
+        query = db.session.query(distinct(Response.id), cls.junk)\
             .outerjoin(cls, and_(cls.response_id == Response.id, cls.user_id == user_id))\
-            .filter(Response.exercise_id == exercise_id)
+            .filter(Response.exercise_id == exercise_id).order_by(Response.id)
         return query.all()
 
     @classmethod
@@ -174,7 +179,7 @@ class Response(db.Model, JsonSerializer):
     subject = db.Column(db.String())
     subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
 
-    grades = db.relationship('ResponseGrade')
+    # grades = db.relationship('ResponseGrade')
 
     @classmethod
     def get(cls, response_id):
