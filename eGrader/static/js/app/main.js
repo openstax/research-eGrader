@@ -1,5 +1,4 @@
 import $ from 'jquery'
-import jQuery from 'jquery';
 import _ from 'underscore'
 import noty from 'noty'
 import {activateFormWidget, activateNoteWidget, activateGraderSubmitButton, activateQualButton} from './events.js'
@@ -24,32 +23,29 @@ var App = {
         this.socketManager = new SocketManager();
         this.Notes = new Notes(userId, exerciseId);
 
-        this.sessionId = this.socketManager.getSessionId();
-        console.log(this.sessionId);
-
         this.activateEvents();
 
         // Load the exercise
         this.loadExercise(this.exerciseId);
-        // Load the next response
-        this.nextResponse(this.userId, this.exerciseId);
+
     },
 
     activateEvents() {
         activateNoteWidget();
-        // activateQualButton(this.submitUnqualifiedExercise.bind(this))
     },
 
     getNextExercise() {
         console.log('Getting new exercise');
+        this.exerciseLoading();
         let self = this;
         let exercise = this.API.getNextExercise(self.userId)
             .done(function(r) {
                 let exerciseId = r['exercise_id'];
                 self.exerciseId = exerciseId;
+                console.log('Exercise ' + exerciseId + ' is loading');
+                // Load the next response
                 self.loadExercise(exerciseId);
                 self.notifyInformation('New Exercise Loaded!');
-                //console.log(exerciseId);
 
             })
             .fail(function(r) {
@@ -62,6 +58,7 @@ var App = {
         let exercise = this.API.getExercise(exerciseId)
             .done(function(r) {
                 self.showExercise(r);
+                self.nextResponse(self.userId, self.exerciseId);
             })
             .fail(function(r) {
                 // console.log(r);
@@ -81,17 +78,19 @@ var App = {
 
         $eText.html(r['exercise_html']);
         $eAnswer.html(r['answer_html']);
+
+        this.exerciseDelayLoad();
+
         this.feedbackChoices = r['feedback_choices'];
 
-        this.Notes.loadNotes(this.userId, this.exerciseId)
+        this.Notes.loadNotes(this.userId, this.exerciseId);
 
     },
 
     showResponse(r) {
         let $stuResponse = $('.stu-response');
-        console.log('loading response...');
         $stuResponse.html(r['response']['free_response']);
-        console.log(r['response']['free_response']);
+        console.log('loading response ' + r['response']['free_response']);
 
         // Need to set hidden field for response_id in the form
         this.loadGraderForm(this.feedbackChoices);
@@ -100,10 +99,11 @@ var App = {
 
     nextResponse(userId, exerciseId) {
         let self = this;
+        console.log("Getting next response");
 
         let response = this.API.getNextResponse(userId, exerciseId)
             .done(function(r) {
-                if (r['success']){
+                if (r['success'] == true){
                     self.showResponse(r);
                 } else {
                     self.getNextExercise();
@@ -128,11 +128,12 @@ var App = {
 
         activateFormWidget();
         typesetMath(document);
+        this.responseDelayLoad();
 
     },
     
     loadGraderForm(feedbackChoices) {
-        let $container = $('.grader-form-container');
+        let $container = $('.grader-form');
         let source = $('#grader-form-template').html();
         let template = _.template(source);
         $container.empty();
@@ -140,7 +141,7 @@ var App = {
 
         activateGraderSubmitButton(this.submitGraderResponse.bind(this));
         this.loadFeedbackOptions(feedbackChoices);
-        console.log(feedbackChoices)
+        console.log('Returned Feedback CHoices ' + feedbackChoices)
     },
 
     submitGraderResponse() {
@@ -153,6 +154,7 @@ var App = {
         // backend to save.. maybe better placed in a hidden form field? 
         data['user_id'] = this.userId;
         data['session_id'] = this.socketManager.getSessionId();
+        console.log('Trying to get sessionId' + this.socketManager.getSessionId());
 
         if (valid) {
             let submit = this.API.submitGradedResponse(data)
@@ -161,7 +163,8 @@ var App = {
                 // If there are no more responses then get a new exercise
                 console.log('Load the next response');
                 self.nextResponse(self.userId, self.exerciseId);
-                self.notifySuccess('Grade submitted!')
+                self.notifySuccess('Grade submitted!');
+                self.responseLoading();
             })
             .fail(function(r) {
                 throw new Error('There was a problem trying to save the graded response')
@@ -173,7 +176,7 @@ var App = {
     addNote() {
         let text = $('.notes-text').val();
         if (text) {
-            console.log(text);
+            console.log('Returned note text:' + text);
             this.Notes.addNote(this.userId, this.exerciseId, text)
         } else {
             this.notifyError('Please input a value into the text area.')
@@ -187,7 +190,8 @@ var App = {
             user_id: self.userId,
             exercise_id: self.exerciseId
         };
-        console.log(data);
+        this.exerciseLoading();
+        this.responseLoading();
 
         let submit = this.API.submitUnqualifiedExercise(data)
             .done(function(r) {
@@ -252,8 +256,37 @@ var App = {
             this.notifyError('There was an error. Please make a quality selection')
         }
 
+    },
 
+    exerciseLoading() {
+        $('.exercise-container').addClass('loading');
+        $('.exercise-text-area').hide();
+    },
 
+    exerciseLoaded() {
+        $('.exercise-container').removeClass('loading');
+        $('.exercise-text-area').show();
+    },
+
+    exerciseDelayLoad() {
+        setTimeout(this.exerciseLoaded, 1000)
+
+    },
+
+    responseLoading() {
+        $('.grader-form-container').addClass('loading');
+        $('.grader-form').hide();
+        $('.stu-response-container').hide();
+    },
+
+    responseLoaded() {
+        $('.grader-form-container').removeClass('loading');
+        $('.grader-form').show();
+        $('.stu-response-container').show();
+    },
+
+    responseDelayLoad() {
+        setTimeout(this.responseLoaded, 1000)
     }
 
 };

@@ -18,7 +18,7 @@ class SocketManager {
 
         this.socket.on('connection', function(msg) {
             self.sessionId = msg['session_id'];
-            console.log(self.sessionId)
+            console.log('Server returned session Id:' + self.sessionId)
         })
     }
 
