@@ -70,8 +70,6 @@ var App = {
         let $eText = $('.exercise-text');
         let $eAnswer = $('.exercise-answer');
         let $uid = $('.exercise-identifier');
-
-        console.log(r);
         
         $eText.empty();
         $eAnswer.empty();
