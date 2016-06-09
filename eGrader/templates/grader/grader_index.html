@@ -38,7 +38,7 @@
                             </a>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <button class="btn">View Reference</button>
+                            <button class="btn" onClick="window.App.showReferenceBook()">View Reference</button>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
                             <button class="btn" id="notes_button">Hide Notes</button>
@@ -140,10 +140,9 @@
     <script>
 
         const userId = {{ user_id }};
-        let exerciseId = {{ exercise_id }};
 
         document.addEventListener("DOMContentLoaded", function (event) {
-            window.App.start(userId, exerciseId);
+            window.App.start(userId);
 
         });
 
