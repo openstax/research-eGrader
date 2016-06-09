@@ -106,6 +106,13 @@ def get_parsed_exercise(exercise_id):
 
     exercise = Exercise.get(exercise_id)
 
+    subject = Subject.get(exercise.subject_id)
+
+    if exercise.book_row_id:
+        book_url = '{0}:{1}'.format(subject.book_url, exercise.book_row_id)
+    else:
+        book_url = subject.book_url
+
     e_data = exercise.data['questions'][0]
 
     # Create a list for the feedback_choices
@@ -123,7 +130,8 @@ def get_parsed_exercise(exercise_id):
                 exercise_html=e_data['stem_html'],
                 answer_html=answer_html,
                 feedback_choices=feedback_choices,
-                uid=exercise.uid
+                uid=exercise.uid,
+                book_url=book_url
                 )
 
 
@@ -214,6 +222,9 @@ class Exercise(db.Model, JsonSerializer):
     features = db.Column(ARRAY(db.Integer()))
     forest_name = db.Column(db.String())
     subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
+    chapter_id = db.Column(db.Integer())
+    section_id = db.Column(db.Integer())
+    book_row_id = db.Column(db.Integer())
 
     responses = db.relationship('Response')
 
@@ -277,3 +288,8 @@ class Subject(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String())
     tag = db.Column(db.String())
+    book_url = db.Column(db.String())
+
+    @classmethod
+    def get(cls, subject_id):
+        return db.session.query(cls).get(subject_id)

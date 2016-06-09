@@ -13,20 +13,18 @@ window.$ = window.jQuery = $;
 
 var App = {
 
-    start(userId, exerciseId) {
+    start(userId) {
         startMathJax();
         this.userId = userId;
-        this.exerciseId = exerciseId;
 
         // setup interfaces
         this.API = new API();
         this.socketManager = new SocketManager();
-        this.Notes = new Notes(userId, exerciseId);
 
         this.activateEvents();
 
         // Load the exercise
-        this.loadExercise(this.exerciseId);
+        this.getNextExercise();
 
     },
 
@@ -43,10 +41,10 @@ var App = {
                 let exerciseId = r['exercise_id'];
                 self.exerciseId = exerciseId;
                 console.log('Exercise ' + exerciseId + ' is loading');
+                self.Notes = new Notes(self.userId, self.exerciseId);
                 // Load the next response
                 self.loadExercise(exerciseId);
                 self.notifyInformation('New Exercise Loaded!');
-
             })
             .fail(function(r) {
                 throw new Error('There was a problem retrieving an exercise from the API')
@@ -87,6 +85,7 @@ var App = {
         this.feedbackChoices = r['feedback_choices'];
 
         this.Notes.loadNotes(this.userId, this.exerciseId);
+        this.exerciseBookUrl = r['book_url'];
 
     },
 
@@ -259,6 +258,10 @@ var App = {
             this.notifyError('There was an error. Please make a quality selection')
         }
 
+    },
+    
+    showReferenceBook() {
+        window.open(this.exerciseBookUrl);
     },
 
     exerciseLoading() {
