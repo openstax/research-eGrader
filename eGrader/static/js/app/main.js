@@ -69,15 +69,20 @@ var App = {
     showExercise(r) {
         let $eText = $('.exercise-text');
         let $eAnswer = $('.exercise-answer');
+        let $uid = $('.exercise-identifier');
+
+        console.log(r);
         
         $eText.empty();
         $eAnswer.empty();
+        $uid.empty();
         
         console.log('loading exercise...');
         console.log(r);
 
         $eText.html(r['exercise_html']);
         $eAnswer.html(r['answer_html']);
+        $uid.html('exercise id: ' + r['uid']);
 
         this.exerciseDelayLoad();
 

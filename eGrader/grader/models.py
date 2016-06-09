@@ -113,15 +113,17 @@ def get_parsed_exercise(exercise_id):
 
     # Get the correct answer
     for answer in e_data['answers']:
-        feedback = (str(answer['id']), answer['feedback_html'])
-        feedback_choices.append(feedback)
+        if 'feedback_html' in answer and answer['feedback_html']:
+            feedback = (str(answer['id']), answer['feedback_html'])
+            feedback_choices.append(feedback)
         if answer['correctness'] == '1.0':
             answer_html = answer['content_html']
 
     return dict(id=exercise.id,
                 exercise_html=e_data['stem_html'],
                 answer_html=answer_html,
-                feedback_choices=feedback_choices
+                feedback_choices=feedback_choices,
+                uid=exercise.uid
                 )
 
 
