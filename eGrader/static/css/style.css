@@ -6,6 +6,10 @@ body {
     color: #424242;
 }
 
+img {
+    max-width: 500px;
+}
+
 .text-style {
     max-width: 34em;
     margin: auto;
@@ -181,6 +185,7 @@ h1 {
 
 .heading {
     font-weight: bold;
+    border-bottom: 1px dotted #ccc;
 }
 
 .grader-buttons a {
