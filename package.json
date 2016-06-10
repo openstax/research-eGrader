@@ -21,7 +21,6 @@
     "bootstrap-sass": "^3.3.6",
     "css-loader": "^0.23.1",
     "extract-text-webpack-plugin": "^1.0.1",
-    "handlebars": "^4.0.5",
     "jquery": "^2.2.3",
     "manifest-revision-webpack-plugin": "^0.1.0",
     "noty": "^2.3.8",
