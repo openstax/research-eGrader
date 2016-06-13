@@ -58,7 +58,7 @@ def get_next_response(user_id, exercise_id):
         return responses[prediction_idx]
 
 
-def get_next_exercise_id(user_id, subject_id=None, random=True):
+def get_next_exercise_id(user_id, subject_id=None, chapter_id=None, random=True):
     """
     Get the next exercise with responses that the grader is able to grade.
 
@@ -89,11 +89,14 @@ def get_next_exercise_id(user_id, subject_id=None, random=True):
     if random:
         query = query.order_by(func.random())
     else:
-        query = query.order_by(Exercise.id)
+        query = query.order_by(Exercise.chapter_id)
         print('Getting exercise in order')
 
     if subject_id:
         query = query.filter(Exercise.subject_id == subject_id)
+
+    if chapter_id:
+        query = query.filter(Exercise.chapter_id == chapter_id)
 
     ex = query.first()
 
@@ -131,7 +134,8 @@ def get_parsed_exercise(exercise_id):
                 answer_html=answer_html,
                 feedback_choices=feedback_choices,
                 uid=exercise.uid,
-                book_url=book_url
+                book_url=book_url,
+                chapter_id=exercise.chapter_id
                 )
 
 

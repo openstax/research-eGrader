@@ -36,13 +36,14 @@ var App = {
         console.log('Getting new exercise');
         this.exerciseLoading();
         let self = this;
-        let exercise = this.API.getNextExercise(self.userId)
+        let chapterId = this.chapterId;
+        let exercise = this.API.getNextExercise(self.userId, chapterId)
             .done(function(r) {
                 let exerciseId = r['exercise_id'];
                 self.exerciseId = exerciseId;
+                console.log('Chapter Id is ' + self.chapterId);
                 console.log('Exercise ' + exerciseId + ' is loading');
                 self.Notes = new Notes(self.userId, self.exerciseId);
-                // Load the next response
                 self.loadExercise(exerciseId);
                 self.notifyInformation('New Exercise Loaded!');
             })
@@ -57,6 +58,8 @@ var App = {
             .done(function(r) {
                 self.showExercise(r);
                 self.nextResponse(self.userId, self.exerciseId);
+                self.chapterId = r['chapter_id'];
+                console.log('Chapter Id is ' + self.chapterId);
             })
             .fail(function(r) {
                 // console.log(r);

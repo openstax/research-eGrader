@@ -17,13 +17,13 @@ class API {
         return exercise
     }
     
-    getNextExercise(userId) {
+    getNextExercise(userId, chapter_id=null) {
         const resource = 'exercise/next';
         let response = $.ajax({
             type: 'GET',
             dataType: 'json',
             url: this.rootUrl + resource,
-            data: {user_id: userId}
+            data: {user_id: userId, chapter_id:chapter_id}
         });
         
         return response
