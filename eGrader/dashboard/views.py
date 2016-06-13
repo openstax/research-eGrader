@@ -38,7 +38,7 @@ def index():
                 total_responses=total_responses,
                 avg_graded_per_session=total_responses / total_sessions,
                 total_time_grading=grading_session_metrics[2] / 60,
-                response_grading_rate=(int(grading_session_metrics[2] / 60) / total_responses)
+                response_grading_rate=(total_responses / int(grading_session_metrics[2] / 60))
             )
         except Exception:
             data = dict(
