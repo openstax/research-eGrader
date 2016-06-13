@@ -36,8 +36,10 @@ def get_exercise(exercise_id):
 @api.route('/exercise/next', methods=['GET'])
 def get_next_exercise():
     user_id = request.args.get('user_id', None)
+    chapter_id = request.args.get('chapter_id', None)
     user = User.get(user_id)
-    exercise_id = get_next_exercise_id(user_id, user.subject_id)
+
+    exercise_id = get_next_exercise_id(user_id, user.subject_id, chapter_id=chapter_id, random=True)
 
     if not exercise_id:
         return jsonify(dict(success=False, message='There are no more exercises for that user'))
