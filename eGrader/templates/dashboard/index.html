@@ -1,5 +1,11 @@
 {% extends 'layouts/dashboard_base.html' %}
 
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+    <script src="{{ url_for('static', filename='js/lib/moment.min.js') }}"></script>
+{% endblock styles %}
+
 
 {% block content %}
     <h1 class="page-header">Dashboard</h1>
@@ -23,6 +29,40 @@
             </div>
 
     </div>
+
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-12">
+            <h1 class="page-header">Grading Sessions</h1>
+
+            <table class="session-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Session start</th>
+                        <th>Session end</th>
+                        <th>Total graded</th>
+                        <th>Total time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for session in sessions %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ momentjs(session.started_on).simple() }}</td>
+                        <td>{{ momentjs(session.ended_on).simple() }}</td>
+                        <td>{{ session.response_count }}</td>
+                        <td>{{ momentjs(session.started_on, session.ended_on).time_from() }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row spacer">
+
+    </div>
+
     <div class="row">
         <div class="col-xs-12 col-sm-12">
             <a id="begin-grading" class="btn btn-lg btn-success begin-grading" href="{{ url_for('grader.index') }}">Begin Grading</a>
@@ -34,4 +74,12 @@
 
 {% block scripts %}
     {{ super() }}
+    <script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.session-table').DataTable({bFilter: false});
+        })
+    </script>
+
 {% endblock scripts %}

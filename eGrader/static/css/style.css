@@ -244,3 +244,11 @@ h1 {
 .shadow-box {
     box-shadow: 5px 5px 5px 0px #d9d9d9;
 }
+
+.spacer {
+    height: 50px;
+}
+
+.session-table {
+    font-family:  Helvetica, Arial, sans-serif
+}

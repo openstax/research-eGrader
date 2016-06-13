@@ -4,7 +4,11 @@ from flask.ext.login import current_user
 from flask.ext.security import login_required
 
 from eGrader.core import db
-from eGrader.grader.models import ResponseGrade, UserGradingSession, get_grading_session_metrics
+from eGrader.grader.models import (get_grading_session_details,
+                                   get_grading_session_metrics,
+                                   ResponseGrade,
+                                   UserGradingSession
+                                   )
 
 dashboard = Blueprint('dashboard', __name__)
 
@@ -24,6 +28,7 @@ def index():
         db.session.commit()
 
     grading_session_metrics = get_grading_session_metrics(current_user.id)
+    grading_session_details = get_grading_session_details(current_user.id)
 
     if grading_session_metrics[0]:
         total_responses = grading_session_metrics[1]
@@ -50,4 +55,17 @@ def index():
             response_grading_rate=0
         )
 
-    return render_template('dashboard/index.html', data=data)
+    if grading_session_details:
+        sessions = []
+        for item in grading_session_details:
+            session = dict(response_count=item[1],
+                           started_on=item[2],
+                           ended_on=item[3],
+                           time_grading=item[4])
+            sessions.append(session)
+    else:
+        sessions = []
+
+    print grading_session_details
+
+    return render_template('dashboard/index.html', data=data, sessions=sessions)

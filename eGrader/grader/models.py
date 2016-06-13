@@ -152,6 +152,22 @@ def get_grading_session_metrics(user_id):
     return query.all()[0]
 
 
+def get_grading_session_details(user_id):
+    query = db.session.query(UserGradingSession.id,
+                             func.count(ResponseGrade.id),
+                             UserGradingSession.started_on,
+                             UserGradingSession.ended_on,
+                             label('time_grading', UserGradingSession.ended_on - UserGradingSession.started_on))\
+        .join(ResponseGrade, ResponseGrade.session_id == UserGradingSession.id)\
+        .filter(UserGradingSession.user_id == user_id, UserGradingSession.ended_on != None)\
+        .group_by(UserGradingSession.id,
+                  UserGradingSession.started_on,
+                  UserGradingSession.ended_on)\
+        .order_by(UserGradingSession.started_on)
+
+    return query.all()
+
+
 class ResponseGrade(db.Model):
     ___tablename__= 'response_grades'
     id = db.Column(db.Integer(), primary_key=True)

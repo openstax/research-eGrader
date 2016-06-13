@@ -1,13 +1,15 @@
 from flask import Flask
 from flask_security import SQLAlchemyUserDatastore
 
-from eGrader.accounts.forms import ExtendedRegisterForm
+from .accounts.forms import ExtendedRegisterForm
+
 from .accounts.models import User, Role
 from .core import bootstrap, db, security, mail, webpack, socketio
 from .api.endpoints import api
 from .dashboard.views import dashboard
 from .grader.views import grader
 from .redis_session import RedisSessionInterface
+from .utils import MomentJS
 
 
 def create_app(package_name, package_path, settings=None):
@@ -30,6 +32,9 @@ def create_app(package_name, package_path, settings=None):
     mail.init_app(app)
     webpack.init_app(app)
     socketio.init_app(app)
+
+    # add any jinja2 globals
+    app.jinja_env.globals['momentjs'] = MomentJS
 
     # attach redis sessions
     app.session_interface = RedisSessionInterface()
