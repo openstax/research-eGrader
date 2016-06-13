@@ -3,6 +3,8 @@ from flask import abort, Blueprint, jsonify, request
 
 from eGrader.core import db
 
+from eGrader.accounts.models import User
+
 from eGrader.grader.models import (ExerciseNote,
                                    get_next_exercise_id,
                                    get_parsed_exercise,
@@ -34,7 +36,9 @@ def get_exercise(exercise_id):
 @api.route('/exercise/next', methods=['GET'])
 def get_next_exercise():
     user_id = request.args.get('user_id', None)
-    exercise_id = get_next_exercise_id(user_id)
+    user = User.get(user_id)
+    exercise_id = get_next_exercise_id(user_id, user.subject_id)
+
     if not exercise_id:
         return jsonify(dict(success=False, message='There are no more exercises for that user'))
     else:
