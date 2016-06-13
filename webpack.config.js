@@ -16,7 +16,7 @@ module.exports = {
     entry: {
         app_js: [
             // 'webpack/hot/dev-server',
-            rootAssetPath + '/js/app/main'
+            rootAssetPath + '/js/app/main',
         ],
         app_css: [
             cssAssetPath + '/style',
