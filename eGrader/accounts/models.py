@@ -45,3 +45,7 @@ class User(UserMixin, db.Model):
 
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
+
+    @classmethod
+    def get(cls, user_id):
+        return db.session.query(cls).get(user_id)
