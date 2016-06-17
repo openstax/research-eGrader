@@ -139,7 +139,7 @@ h1 {
     margin-left: 2% !important;
 }
 
-.maring_bottom {
+.margin_bottom {
     margin-bottom: 9px;
 }
 
@@ -175,9 +175,6 @@ h1 {
 
 }
 
-.feedback {
-    height: 50px;
-}
 
 .exercise-header {
     /*font-size: 18px;*/
@@ -237,12 +234,9 @@ h1 {
     display: block;
 }
 
-.loading .qcontent {
-    display: none;
-}
-
 .shadow-box {
     box-shadow: 5px 5px 5px 0px #d9d9d9;
+    overflow: visible;
 }
 
 .spacer {
@@ -250,5 +244,54 @@ h1 {
 }
 
 .session-table {
-    font-family:  Helvetica, Arial, sans-serif
+    font-family:  Helvetica, Arial, sans-serif;
+}
+
+
+.bottom-form {
+    height: auto;
+    overflow: auto;
+}
+
+.radio label {
+    font-weight: normal;
+}
+
+input[type=radio] {
+    border: 0;
+    float: left;
+    box-shadow: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 5px;
+    margin-right:10px;
+  }
+
+.feedback-dropdown {
+    position: relative;
+}
+
+.choices {
+    position: absolute;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    background: #ffffff;
+}
+
+.choice {
+    border-bottom: 1px solid #ccc;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 5px 5px 5px 5px;
+}
+
+.inactive:hover {
+    background: #4b74ff;
+    color: #ffffff;
+}
+
+
+#graderSubmit {
+    margin-top: 25px;
 }
