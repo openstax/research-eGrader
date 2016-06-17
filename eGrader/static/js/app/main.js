@@ -1,13 +1,14 @@
-import $ from 'jquery'
-import _ from 'underscore'
-import noty from 'noty'
-import {activateFormWidget, activateNoteWidget, activateGraderSubmitButton, activateQualButton} from './events.js'
-import API from './api.js'
-import getFormData from './utils.js'
+import $ from "jquery";
+import _ from "underscore";
+import noty from "noty";
+import {activateFormWidget, activateNoteWidget, activateGraderSubmitButton} from "./events.js";
+import API from "./api.js";
+import getFormData from "./utils.js";
+import {startMathJax, typesetMath} from "./mathjax.js";
+import SocketManager from "./socket.js";
+import Notes from "./notes.js";
+import DropDown from "./dropdown.js";
 // import Handlebars from 'handlebars'
-import {startMathJax, typesetMath} from './mathjax.js'
-import SocketManager from './socket.js'
-import Notes from './notes.js'
 
 window.$ = window.jQuery = $;
 
@@ -123,13 +124,18 @@ var App = {
     loadFeedbackOptions(feedbackChoices) {
         // Grab feedback form element
 
-        let $feedback = $('.feedback');
+        let $fChoices = $('.feedback-dropdown .choices');
+
 
         _.forEach(feedbackChoices, function(choice, index) {
-            $feedback.append($("<option></option>")
-                    .attr("value",choice[0])
-                    .text(choice[1]));
+            let $div= $('<div></div>').addClass('choice');
+
+            $div.attr('data-value', choice[0]).html(choice[1]);
+            $fChoices.append($div);
+
         });
+
+        let dd = new DropDown($('.feedback-dropdown'), $('#feedbackId'));
 
         activateFormWidget();
         typesetMath(document);
@@ -154,9 +160,9 @@ var App = {
         let data = getFormData($('form'));
 
         const valid = this.validateForm(data);
-        
-        // inject the userId to the data as it's used by the 
-        // backend to save.. maybe better placed in a hidden form field? 
+
+        // inject the userId to the data as it's used by the
+        // backend to save.. maybe better placed in a hidden form field?
         data['user_id'] = this.userId;
         data['session_id'] = this.socketManager.getSessionId();
         console.log('Trying to get sessionId' + this.socketManager.getSessionId());

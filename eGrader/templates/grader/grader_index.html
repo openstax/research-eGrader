@@ -136,7 +136,9 @@
 {% endblock content %}
 
 {% block scripts %}
+    {{ super() }}
     {{ javascript_tag('app_js') | safe }}
+
     <script>
 
         const userId = {{ user_id }};
@@ -174,6 +176,7 @@
 
         <form id="grader-response" name="grader-response">
             <input type="hidden" id="responseId" name="responseId" value=""/>
+            <input type="hidden" id="feedbackId" name="feedback_id" value="null"/>
 
             <ul class="quality_ul">
                 <li>
@@ -193,12 +196,22 @@
                         <div class="row">
                             <div class="col-md-4 bold">Score</div>
                             <div class="col-md-8">
-                                <select required class="score form-control" name="score">
+                                    <div class="radio">
+                                        <label><input type="radio" name="score" value="0">No Credit</label>
+                                    </div>
+                                    <div class="radio">
+                                        <label><input type="radio" name="score" value="1">Full Credit</label>
+                                    </div>
+                                    <div class="radio">
+                                        <label><input type="radio" name="score" value=".5">Partial Credit</label>
+                                    </div>
+<!--                                <select required class="score form-control" name="score">
                                     <option value="null">---Select an option---</option>
                                     <option value="0">No Credit</option>
                                     <option value="1">Full Credit</option>
                                     <option value="0.5">Partial Credit</option>
                                 </select>
+-->
                             </div>
                         </div>
                     </li>
@@ -206,22 +219,46 @@
                         <div class="row">
                             <div class="col-md-4 bold">Misconception?</div>
                             <div class="col-md-8">
-                                <select required class="misconception form-control" name="misconception">
+                                 <div class="radio">
+                                    <label><input type="radio" name="misconception" value="t">Yes</label>
+                                </div>
+                                <div class="radio">
+                                    <label><input type="radio" name="misconception" value="n">No</label>
+                                </div>
+<!--                                <select required class="misconception form-control" name="misconception">
                                     <option value="null">---Select an option---</option>
                                     <option value="t">Yes</option>
                                     <option value="f">No</option>
                                 </select>
+-->
                             </div>
                         </div>
                     </li>
                     <li>
                         <div class="row">
                             <div class="col-md-4 bold">Feedback</div>
-                            <div class="col-md-8">
-                                <select required class="feedback form-control" name="feedback_id">
-                                    <option value="null">---Select an option---</option>
-                                    <option value="0">None of the options apply</option>
-                                </select>
+
+                                <div class="col-md-8">
+                                    <div class="feedback-dropdown">
+                                        <div class="choices">
+                                            <div class="choice" data-value="null">
+                                                ---Select an option---
+                                            </div>
+
+                                            <div class="choice" data-value="0">
+                                                None of the options apply
+                                            </div>
+
+
+
+    <!--                            <select required class="feedback form-control" name="feedback_id">
+                                        <option value="null">---Select an option---</option>
+                                        <option value="0">None of the options apply</option>
+                                    </select>
+
+
+    -->                                 </div>
+                                    </div>
                             </div>
                         </div>
                     </li>
@@ -232,7 +269,6 @@
         </form>
     </script>
     {% endraw %}
-
 
 
 {% endblock scripts %}
