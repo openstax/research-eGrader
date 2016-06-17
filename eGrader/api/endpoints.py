@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import abort, Blueprint, jsonify, request
+from flask.ext.login import login_required
 
 from eGrader.core import db
 
@@ -34,6 +35,7 @@ def get_exercise(exercise_id):
 
 
 @api.route('/exercise/next', methods=['GET'])
+@login_required
 def get_next_exercise():
     user_id = request.args.get('user_id', None)
     chapter_id = request.args.get('chapter_id', None)
@@ -48,6 +50,7 @@ def get_next_exercise():
 
 
 @api.route('/response/next', methods=['GET'])
+@login_required
 def next_response():
     from eGrader.grader.models import get_next_response
 
@@ -63,6 +66,7 @@ def next_response():
 
 
 @api.route('/response/submit', methods=['POST'])
+@login_required
 def submit_grader_response():
     posted = request.get_json()
     print(posted)
@@ -83,6 +87,7 @@ def submit_grader_response():
 
 
 @api.route('/exercise/unqualified', methods=['POST'])
+@login_required
 def not_qualified():
     posted = request.get_json()
     unqual = UserUnqualifiedExercise(
@@ -96,6 +101,7 @@ def not_qualified():
 
 
 @api.route('/exercise/notes', methods=['GET'])
+@login_required
 def get_user_exercise_notes():
     user_id = request.args.get('user_id', None)
     exercise_id = request.args.get('exercise_id', None)
@@ -110,6 +116,7 @@ def get_user_exercise_notes():
 
 
 @api.route('/exercise/notes', methods=['POST'])
+@login_required
 def submit_note():
     posted = request.get_json()
     note = ExerciseNote(
