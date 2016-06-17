@@ -86,17 +86,17 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None, random=True)
         .filter(~Response.id.in_(subq1)) \
         .filter(~Exercise.id.in_(subq2)) \
 
-    if random:
-        query = query.order_by(func.random())
-    else:
-        query = query.order_by(Exercise.chapter_id)
-        print('Getting exercise in order')
-
     if subject_id:
         query = query.filter(Exercise.subject_id == subject_id)
 
     if chapter_id:
         query = query.filter(Exercise.chapter_id == chapter_id)
+
+    if random:
+        query = query.order_by(func.random())
+    else:
+        query = query.order_by(Exercise.chapter_id)
+        print('Getting exercise in order')
 
     ex = query.first()
 
