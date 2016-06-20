@@ -24,6 +24,7 @@ def update_exercises_with_subject():
         db.session.add(exercise)
     db.session.commit()
 
+
 def update_responses_with_subject():
     subjects = dict(
         apbio=1,

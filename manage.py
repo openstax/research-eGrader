@@ -12,22 +12,14 @@ manager = Manager(app)
 
 
 @manager.command
-def create_db():
-    db.create_all()
-    db.session.commit()
-    print ('Database has been created')
-
-
-@manager.command
 def drop_db():
     if prompt_bool(
-            'Are you sure you want to lose all your data for {0}'.format(
+            'Are you sure you want to lose all your data for {0} ? \nThis is process is not reversable'.format(
                 app.config['SQLALCHEMY_DATABASE_URI'].split('@')[1])
     ):
-        print prompt_bool
         db.drop_all()
         db.session.commit()
-        print ('Database has been dropped')
+        print('Database has been dropped')
 
 
 @manager.command
@@ -36,9 +28,12 @@ def reset_db():
             'Are you sure you want to lose all your data for {0}'.format(
                 app.config['SQLALCHEMY_DATABASE_URI'].split('@')[1])
     ):
-        drop_db()
-        create_db()
-        print ('Database has been reset')
+        from alembic.command import downgrade, upgrade
+        from alembic.config import Config as AlembicConfig
+        config = AlembicConfig('alembic.ini')
+        downgrade(config, 'base')
+        upgrade(config, 'head')
+        print('Database has been reset')
 
 
 @manager.command
