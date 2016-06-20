@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import url_for
-from flask.ext.script import Manager
+from flask.ext.script import Manager, prompt_bool
 from flask.ext.security import utils
 
 from eGrader import create_app
@@ -20,16 +20,25 @@ def create_db():
 
 @manager.command
 def drop_db():
-    db.drop_all()
-    db.session.commit()
-    print ('Database has been dropped')
+    if prompt_bool(
+            'Are you sure you want to lose all your data for {0}'.format(
+                app.config['SQLALCHEMY_DATABASE_URI'].split('@')[1])
+    ):
+        print prompt_bool
+        db.drop_all()
+        db.session.commit()
+        print ('Database has been dropped')
 
 
 @manager.command
 def reset_db():
-    drop_db()
-    create_db()
-    print ('Database has been reset')
+    if prompt_bool(
+            'Are you sure you want to lose all your data for {0}'.format(
+                app.config['SQLALCHEMY_DATABASE_URI'].split('@')[1])
+    ):
+        drop_db()
+        create_db()
+        print ('Database has been reset')
 
 
 @manager.command
@@ -38,12 +47,14 @@ def load_exercise_features():
     load_exercise_features()
     return
 
+
 @manager.command
 def load_subject_ids():
     from eGrader.tasks.add_subject_ids import update_responses_with_subject, update_exercises_with_subject
     update_exercises_with_subject()
     update_responses_with_subject()
     return
+
 
 @manager.option('-e', '--email', dest='email')
 @manager.option('-p', '--password', dest='password')
