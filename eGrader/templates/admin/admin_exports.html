@@ -1,0 +1,33 @@
+{% extends 'layouts/admin_base.html' %}
+
+{% macro export_buttons(title, action) %}
+    <li class="list-group-item">
+        <div class="label-btn-grp">
+            <h4 class="list-group-item-heading">{{ title }}</h4>
+            <div class="btn-group">
+                <a class="btn btn-default" href="{{ url_for(action) }}">
+                    Export
+                </a>
+            </div>
+        </div>
+    </li>
+
+{% endmacro %}
+
+{% block content %}
+    <div class="export-data panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title">Export data</h2>
+        </div>
+        <div class="panel-body">
+            <ul class="list-group">
+                {{ export_buttons('Graded Responses', 'admin.export_graded_responses') }}
+                {{ export_buttons('User Grading Sessions', 'admin.export_sessions') }}
+                {{ export_buttons('User Data', 'admin.export_users') }}
+                {{ export_buttons('Exercises', 'admin.export_exercises') }}
+                {{ export_buttons('Responses', 'admin.export_responses') }}
+            </ul>
+        </div>
+    </div>
+
+{% endblock content %}

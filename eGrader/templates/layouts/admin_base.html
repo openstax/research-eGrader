@@ -1,0 +1,58 @@
+{% extends 'layouts/base.html' %}
+
+
+{% set navigation_bar = [('/admin', 'index', 'Overview'),
+                         ('/admin/users', 'users', 'Users'),
+                         ('/admin/export', 'export', 'Export'),
+                         ] %}
+
+{% block styles %}
+    {{ super() }}
+    {{  stylesheet_tag('app_css') | safe }}
+
+{% endblock styles %}
+
+{% block navbar %}
+    {% include 'layouts/nav.html' %}
+{% endblock navbar %}
+
+{% block sidebar %}
+
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+
+                    {% for href, id, caption in navigation_bar %}
+                        <li {% if id == active_page %} class="active"{% endif %}>
+                            <a href="{{ href| e }}">{{ caption|e }}</a>
+                        </li>
+                    {% endfor %}
+                 </ul>
+
+            </div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+    </div>
+
+{% endblock sidebar %}
+
+{% block scripts %}
+    {{ super() }}
+
+{#    <script>#}
+{#        $(document).ready(function() {#}
+{#            $('.nav-sidebar li').click(function(event) {#}
+{#                $('.active').removeClass('active');#}
+{##}
+{#                $(this).addClass('active');#}
+{#            } )#}
+{#        })#}
+{##}
+{#    </script>#}
+
+{% endblock %}

@@ -1,10 +1,54 @@
+import csv
+from StringIO import StringIO
 from functools import wraps
 
 import sqlalchemy as db
+from datetime import datetime
+
+from flask import Response
 
 from eGrader.exceptions import api_error_handler
 from jinja2 import Markup
 from sqlalchemy.sql.expression import extract
+
+
+def to_csv(field_names, collection):
+
+    def get_att(model, att):
+        att = getattr(model, att)
+        return ' '.join(str(att).split())
+
+    def make_row(model):
+        return {att: get_att(model, att) for att in field_names}
+
+    def make_writer(sio):
+        return csv.DictWriter(sio, field_names, dialect='excel-tab')
+
+    # yield header
+    sio = StringIO()
+    w = make_writer(sio)
+    w.writeheader()
+    yield sio.getvalue()
+
+    # yield rows
+    for model in collection:
+        row = make_row(model)
+        sio = StringIO()
+        w = make_writer(sio)
+        w.writerow(row)
+        yield sio.getvalue()
+
+
+def render_csv(field_names, collection, filename, datestamp='True'):
+    if datestamp:
+        filename = datetime.now().strftime(filename + '-%Y%m%d.csv')
+    else:
+        filename = filename + '.csv'
+
+    return Response(to_csv(field_names, collection),
+                    mimetype="text/csv",
+                    headers={"Content-Disposition":
+                             "attachment;filename=" + filename})
 
 
 def xtract(label, expr):
