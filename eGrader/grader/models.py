@@ -200,6 +200,7 @@ class Response(db.Model, JsonSerializer):
     __tablename__ = 'responses'
     id = db.Column(db.Integer(), primary_key=True)  # The corresponding columns in the spreadsheet
     external_id = db.Column(db.Integer())           # X.1
+    step_id = db.Column(db.Integer(), unique=True)  # Basically the unique id of the response
     deidentifier = db.Column(db.String())           # Deidentifier
     free_response = db.Column(db.Text())            # Free.Response
     correct = db.Column(db.Boolean())               # Correct.
