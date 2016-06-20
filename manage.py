@@ -50,6 +50,15 @@ def load_subject_ids():
     update_responses_with_subject()
     return
 
+@manager.command
+def update_book_info():
+    from eGrader.tasks.update_book_info import update_exercises_with_book_info
+    # Update Biology exercises
+    update_exercises_with_book_info('eGrader/tasks/data/apbio_ex.csv')
+    # update Physics exercises
+    update_exercises_with_book_info('eGrader/tasks/data/hsphys_ex.csv')
+    print('Exercises have been updated with book information')
+
 
 @manager.option('-e', '--email', dest='email')
 @manager.option('-p', '--password', dest='password')

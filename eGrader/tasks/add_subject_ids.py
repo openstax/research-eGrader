@@ -5,7 +5,6 @@ from eGrader.core import db
 from eGrader.models import Exercise, Response
 
 
-
 def update_exercises_with_subject():
 
     subjects = dict(
