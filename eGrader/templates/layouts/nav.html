@@ -24,7 +24,7 @@
                 {% endif %}
                 {% if current_user.has_role('admin') %}
                 <li>
-                    <a href="">Admin</a>
+                    <a href="{{ url_for('admin.index') }}">Admin</a>
                 </li>
                 {% endif %}
             </ul>
