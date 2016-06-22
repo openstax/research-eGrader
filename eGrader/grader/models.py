@@ -314,3 +314,6 @@ class Subject(db.Model):
     @classmethod
     def get(cls, subject_id):
         return db.session.query(cls).get(subject_id)
+
+    def __repr__(self):
+        return self.name

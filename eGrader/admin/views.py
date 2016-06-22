@@ -1,11 +1,23 @@
-from flask import Blueprint, render_template
+from datetime import datetime
+from flask import (current_app,
+                   Blueprint,
+                   flash,
+                   redirect,
+                   render_template,
+                   request,
+                   url_for)
 from flask.ext.principal import Permission, RoleNeed
+from flask_security.utils import encrypt_password
 
+
+from eGrader.accounts.models import User, Role
 from eGrader.admin.exports import (list_graded_responses,
                                    list_exercises,
                                    list_sessions,
                                    list_users,
                                    list_responses)
+from eGrader.admin.forms import CreateUserForm, UpdateUserForm
+from eGrader.core import db
 from eGrader.utils import render_csv
 
 admin_permission = Permission(RoleNeed('admin'))
@@ -23,7 +35,73 @@ def index():
     return render_template('admin_index.html', active_page='index')
 
 
+@admin.route('/users', methods=['GET', 'POST'])
+@admin_permission.require()
+def manage_users():
+    users = db.session.query(User).order_by(User.id).all()
+    form = CreateUserForm(request.form)
+
+    if form.validate_on_submit():
+        encrypted_password = encrypt_password(form.password.data)
+
+        user = User(email=form.email.data,
+                    active=True,
+                    subject_id = form.subject_id.data if form.subject_id.data else None,
+                    registered_at=datetime.now(),
+                    confirmed_at=datetime.now(),
+                    password=encrypted_password)
+        db.session.add(user)
+
+        if form.role_id.data:
+            role = Role.query.get(form.roles.data)
+            user.roles.append(role)
+            db.session.add(role)
+
+        db.session.commit()
+
+    return render_template('admin_users.html',
+                           form=form,
+                           users=users,
+                           active_page='users')
+
+
+@admin.route('/users/edit/<int:user_id>', methods=['GET', 'POST'])
+@admin_permission.require()
+def edit_user(user_id):
+    user = db.session.query(User).get(user_id)
+    form = UpdateUserForm(request.form, user)
+
+    if form.validate_on_submit():
+        # if role is different then we need to delete the previous one and add the new one.
+        user.email = form.email.data,
+        user.subject_id= form.subject_id.data if form.subject_id.data else None
+
+        if form.roles.data :
+            user.roles = []
+            db.session.commit()
+            role = Role.query.get(form.roles.data)
+            user.roles.append(role)
+            db.session.add(role)
+        else:
+            user.roles = []
+            db.session.commit()
+
+        db.session.commit()
+
+
+
+
+        flash('User data updated', 'success')
+        return redirect(url_for('admin.manage_users'))
+
+    return render_template('admin_edit_user.html',
+                           form=form,
+                           user=user,
+                           active_page='users')
+
+
 @admin.route('/export', methods=['GET'])
+@admin_permission.require()
 def export():
     return render_template('admin_exports.html', active_page='export')
 
