@@ -24,6 +24,9 @@ class Role(RoleMixin, db.Model):
         return (self.name != other and
                 self.name != getattr(other, 'name', None))
 
+    def __repr__(self):
+        return self.name
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -42,6 +45,8 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
+
+    subject = db.relationship('Subject')
 
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))

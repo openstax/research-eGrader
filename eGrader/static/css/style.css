@@ -295,3 +295,8 @@ input[type=radio] {
 #graderSubmit {
     margin-top: 25px;
 }
+
+span.label {
+    float: right;
+}
+
