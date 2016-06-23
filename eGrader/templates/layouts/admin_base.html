@@ -8,7 +8,7 @@
 
 {% block styles %}
     {{ super() }}
-    {{  stylesheet_tag('app_css') | safe }}
+    {{ stylesheet_tag('app_css') | safe }}
 
 {% endblock styles %}
 
@@ -17,6 +17,7 @@
 {% endblock navbar %}
 
 {% block sidebar %}
+
 
 
     <div class="container-fluid">
@@ -29,7 +30,7 @@
                             <a href="{{ href| e }}">{{ caption|e }}</a>
                         </li>
                     {% endfor %}
-                 </ul>
+                </ul>
 
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -44,15 +45,15 @@
 {% block scripts %}
     {{ super() }}
 
-{#    <script>#}
-{#        $(document).ready(function() {#}
-{#            $('.nav-sidebar li').click(function(event) {#}
-{#                $('.active').removeClass('active');#}
-{##}
-{#                $(this).addClass('active');#}
-{#            } )#}
-{#        })#}
-{##}
-{#    </script>#}
+    {#    <script>#}
+    {#        $(document).ready(function() {#}
+    {#            $('.nav-sidebar li').click(function(event) {#}
+    {#                $('.active').removeClass('active');#}
+    {##}
+    {#                $(this).addClass('active');#}
+    {#            } )#}
+    {#        })#}
+    {##}
+    {#    </script>#}
 
 {% endblock %}
