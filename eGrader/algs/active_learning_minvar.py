@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 26 10:38:29 2016
-
-@author: drew
-"""
-
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+
+
+class MinVarException(Exception):
+    pass
 
 
 def get_fit_probabilities(features, forest):
@@ -38,8 +35,11 @@ def get_fit_probabilities(features, forest):
 
 
 def get_min_var_idx(orig_features,
-                    orig_labels,
+                    orig_labels_uncorrected,
                     orig_forest,
+                    global_grade_count,
+                    MAX_GLOBAL_GRADES=2,
+                    MAX_LOCAL_GRADES=50,
                     sample_limit=None):
     """
 
@@ -48,12 +48,31 @@ def get_min_var_idx(orig_features,
     orig_features
     orig_labels
     orig_forest
+    global_grade_count -- same dim as orig_labels but counts total grades
     sample_limit
 
     Returns
     -------
+    int
+
+    Notes
+    -----
 
     """
+
+    #Do some data correct in case we are dealing with multi-class stuff
+    N = len(orig_labels_uncorrected)
+    orig_labels = np.copy(orig_labels_uncorrected)
+    orig_labels = np.round(orig_labels)
+
+    #return immediately if all either all items are graded or we have graded
+    #the max number of responses per grader per question
+    total_local_grades = np.nansum(~np.isnan(orig_labels))
+    if (total_local_grades > MAX_LOCAL_GRADES):
+        raise MinVarException
+    elif (total_local_grades == N):
+        raise MinVarException
+
     #Grab the observed/unobserved indices
     obs_idx = np.where(~np.isnan(orig_labels))[0]
     unobs_idx_full = np.where(np.isnan(orig_labels))[0]
@@ -68,6 +87,14 @@ def get_min_var_idx(orig_features,
                                      replace=False)
     else:
         unobs_idx = unobs_idx_full
+
+    #ID entries that have greater than 2 grades from other graders
+    N0 = len(unobs_idx)
+    overgrade = 1.0*(global_grade_count[unobs_idx] >= MAX_GLOBAL_GRADES)
+    overgrade = np.reshape(overgrade, np.prod(overgrade.shape))
+    #Penalize short responses (only one tag or less)
+    L = np.sum(orig_features[unobs_idx, :] > 0, axis=1)
+    undersamp = 1.0*(np.reshape(L, np.prod(L.shape)) <= 1)
 
     #Compute the fit probabilities on the unobserved set
     P = get_fit_probabilities(orig_features[unobs_idx, :],
@@ -93,7 +120,7 @@ def get_min_var_idx(orig_features,
         P0 = get_fit_probabilities(features[unobs_idx, :],
                                    forest)
 
-        var_0 = np.sum(P0[:, 0] * P0[:, 1])
+        var_0 = np.sum(P0[:, 0] * P0[:, 1]) / N0
 
         #Do the case where label is 0
         labels[selection_idx] = 1
@@ -102,13 +129,17 @@ def get_min_var_idx(orig_features,
         P1 = get_fit_probabilities(features[unobs_idx, :],
                                    forest)
 
-        var_1 = np.sum(P1[:, 0] * P1[:, 1])
+        var_1 = np.sum(P1[:, 0] * P1[:, 1]) / N0
 
         # Compute the expectated variance
         var_v[uu] = P[uu, 0] * var_0 + P[uu, 1] * var_1
 
     # Now make the final selection
-    v_min = np.argmin(var_v)
+    # Final metrix adds penalties to the var_v so that we wont consider
+    # responses that fell into those categories if other ones are available
+    # This is because var_v <= 0.25 for any classifier with 2 or more classes
+    final_metric = var_v + overgrade + undersamp
+    v_min = np.argmin(final_metric)
     return unobs_idx[v_min]
 
 
