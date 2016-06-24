@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 26 10:38:29 2016
-
-@author: drew
-"""
-
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+
+
+class MinVarException(Exception):
+    pass
 
 
 def get_fit_probabilities(features, forest):
@@ -56,6 +53,10 @@ def get_min_var_idx(orig_features,
 
     Returns
     -------
+    int
+
+    Notes
+    -----
 
     """
 
@@ -68,9 +69,9 @@ def get_min_var_idx(orig_features,
     #the max number of responses per grader per question
     total_local_grades = np.nansum(~np.isnan(orig_labels))
     if (total_local_grades > MAX_LOCAL_GRADES):
-        return -1  # Change to some exception???
+        raise MinVarException
     elif (total_local_grades == N):
-        return -2  # Change to some other exception???
+        raise MinVarException
 
     #Grab the observed/unobserved indices
     obs_idx = np.where(~np.isnan(orig_labels))[0]

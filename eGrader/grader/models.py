@@ -16,8 +16,8 @@ def get_next_response(user_id, exercise_id):
     """
     Parameters
     ----------
-    user_id
-    exercise_id
+    user_id : int
+    exercise_id: int
 
     Returns
     -------
@@ -28,11 +28,14 @@ def get_next_response(user_id, exercise_id):
     # TODO: Finish docstring of get_next_response function
 
     grades = ResponseGrade.get_grades(user_id, exercise_id)
+    grade_counts = get_graded_count(exercise_id)
     print ('The amount of grades', len(grades))
     print('Printing Grades: ', grades)
 
     labels = [grade[1] for grade in grades]
     labels_array = np.array(labels, dtype=float)
+    global_grade_counts = [grade_count[1] for grade_count in grade_counts]
+    global_grade_count_array = np.array(global_grade_counts)
 
     if all(v is None for v in labels):
         response = Response.get_random_ungraded_response(user_id, exercise_id)
@@ -53,7 +56,7 @@ def get_next_response(user_id, exercise_id):
             print obs_idx
             forest = train_random_forest(features[obs_idx], labels_array[obs_idx])
             print forest
-            prediction_idx = get_min_var_idx(features, labels_array, forest)
+            prediction_idx = get_min_var_idx(features, labels_array, forest, global_grade_count_array)
             print(responses[prediction_idx])
         return responses[prediction_idx]
 
@@ -168,6 +171,16 @@ def get_grading_session_details(user_id):
                   UserGradingSession.started_on,
                   UserGradingSession.ended_on)\
         .order_by(UserGradingSession.started_on)
+
+    return query.all()
+
+
+def get_graded_count(exercise_id):
+    query = db.session.query(Response.id, func.count(func.coalesce(ResponseGrade.id, None)))\
+        .outerjoin(ResponseGrade)\
+        .filter(Response.exercise_id == exercise_id)\
+        .group_by(Response.id)\
+        .order_by(Response.id)
 
     return query.all()
 

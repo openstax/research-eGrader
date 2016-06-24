@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import abort, Blueprint, jsonify, request
 from flask.ext.login import login_required
 
+from eGrader.algs.active_learning_minvar import MinVarException
 from eGrader.core import db
 
 from eGrader.accounts.models import User
@@ -58,7 +59,7 @@ def next_response():
     exercise_id = request.args.get('exercise_id', None)
     try:
         response = get_next_response(user_id, exercise_id)
-    except ValueError:
+    except MinVarException:
         return jsonify(dict(
             message='There are no more responses available for that exercise',
             success=False))
