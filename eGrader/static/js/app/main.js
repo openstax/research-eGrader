@@ -8,7 +8,7 @@ import {startMathJax, typesetMath} from "./mathjax.js";
 import SocketManager from "./socket.js";
 import Notes from "./notes.js";
 import DropDown from "./dropdown.js";
-// import Handlebars from 'handlebars'
+import LocalStorageManager from "./localstorage";
 
 window.$ = window.jQuery = $;
 
@@ -21,12 +21,20 @@ var App = {
         // setup interfaces
         this.API = new API();
         this.socketManager = new SocketManager();
+        this.storageManager = new LocalStorageManager();
 
         this.activateEvents();
 
-        // Load the exercise
-        this.getNextExercise();
-
+        // Check localStorage for last exercise
+        let lastExerciseId = this.storageManager.getLastExercise();
+        if (lastExerciseId) {
+            console.log('Last exercise found');
+            this.exerciseId = lastExerciseId;
+            this.loadExercise(lastExerciseId);
+        } else {
+            console.log('No last exercise found');
+            this.getNextExercise();
+        }
     },
 
     activateEvents() {
@@ -41,10 +49,8 @@ var App = {
         let exercise = this.API.getNextExercise(self.userId, chapterId)
             .done(function(r) {
                 let exerciseId = r['exercise_id'];
-                self.exerciseId = exerciseId;
                 console.log('Chapter Id is ' + self.chapterId);
                 console.log('Exercise ' + exerciseId + ' is loading');
-                self.Notes = new Notes(self.userId, self.exerciseId);
                 self.loadExercise(exerciseId);
                 self.notifyInformation('New Exercise Loaded!');
             })
@@ -55,6 +61,8 @@ var App = {
 
     loadExercise(exerciseId) {
         let self = this;
+        this.storageManager.setLastExercise(exerciseId);
+        this.Notes = new Notes(self.userId, exerciseId);
         let exercise = this.API.getExercise(exerciseId)
             .done(function(r) {
                 self.showExercise(r);
