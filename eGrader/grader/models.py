@@ -56,7 +56,11 @@ def get_next_response(user_id, exercise_id):
             print obs_idx
             forest = train_random_forest(features[obs_idx], labels_array[obs_idx])
             print forest
-            prediction_idx = get_min_var_idx(features, labels_array, forest, global_grade_count_array)
+            prediction_idx = get_min_var_idx(features,
+                                             labels_array,
+                                             forest,
+                                             global_grade_count_array,
+                                             sample_limit=30)
             print(responses[prediction_idx])
         return responses[prediction_idx]
 
