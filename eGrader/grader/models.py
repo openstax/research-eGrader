@@ -80,30 +80,35 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None, random=True)
         the exercise id of the next exercise that has responses to grade
     """
 
-    # A list of responses graded by the user
+    # A query of responses graded by the user
     subq1 = db.session.query(ResponseGrade.response_id) \
         .filter(ResponseGrade.user_id == user_id).subquery()
-    # A list of exercise_ids the user is unqualified to grade
+    # A query of exercise_ids the user is unqualified to grade
     subq2 = db.session.query(UserUnqualifiedExercise.exercise_id) \
         .filter(UserGradingSession.user_id == user_id).subquery()
+    # A query of all exercises and their number of grades
+    subq3 = db.session.query(func.distinct(Exercise.id).label('exercise_id'),
+                             func.count(func.coalesce(ResponseGrade.id, None)).label('grade_count')) \
+        .join(Response) \
+        .outerjoin(ResponseGrade) \
+        .group_by(Exercise.id).subquery()
 
     # Return the first exercise that has responses not yet graded and not set to unqualified
-    query = db.session.query(Exercise) \
-        .join(Response) \
-        .filter(~Response.id.in_(subq1)) \
-        .filter(~Exercise.id.in_(subq2)) \
+    query = db.session.query(Exercise).join(Response)
+
 
     if subject_id:
         query = query.filter(Exercise.subject_id == subject_id)
 
+    if random:
+        query = query.join(subq3, and_(Exercise.id == subq3.c.exercise_id)).order_by(subq3.c.grade_count.asc(), Exercise.id)
+    else:
+        query = query.order_by(Exercise.chapter_id)
+
     if chapter_id:
         query = query.filter(Exercise.chapter_id == chapter_id)
 
-    if random:
-        query = query.order_by(func.random())
-    else:
-        query = query.order_by(Exercise.chapter_id)
-        print('Getting exercise in order')
+    query = query.filter(~Response.id.in_(subq1)).filter(~Exercise.id.in_(subq2))
 
     ex = query.first()
 
