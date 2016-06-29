@@ -49,6 +49,7 @@ var App = {
         let exercise = this.API.getNextExercise(self.userId, chapterId)
             .done(function(r) {
                 let exerciseId = r['exercise_id'];
+                self.exerciseId = exerciseId;
                 console.log('Chapter Id is ' + self.chapterId);
                 console.log('Exercise ' + exerciseId + ' is loading');
                 self.loadExercise(exerciseId);
