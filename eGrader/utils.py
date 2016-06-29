@@ -13,9 +13,9 @@ from sqlalchemy.sql.expression import extract
 
 
 def to_csv(field_names, collection):
-
     def get_att(model, att):
         att = getattr(model, att)
+        att = att.encode('utf8') if type(att) is unicode else att
         return ' '.join(str(att).split())
 
     def make_row(model):
