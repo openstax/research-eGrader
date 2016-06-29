@@ -4,6 +4,7 @@ from sqlalchemy import and_, func
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
 from sqlalchemy.sql.expression import distinct, extract, label
 
+from eGrader.accounts.models import Role, User
 from eGrader.algs.active_learning_minvar import train_random_forest, get_min_var_idx
 from eGrader.core import db
 
@@ -194,6 +195,16 @@ def get_graded_count(exercise_id):
     return query.all()
 
 
+def get_admin_metrics():
+    subject_count= ResponseGrade.subject_count()
+    data = dict(total_grades=ResponseGrade.count(),
+                total_responses=Response.count(),
+                total_physics=subject_count[0][1],
+                total_biology=subject_count[1][1]
+                )
+    return data
+
+
 class ResponseGrade(db.Model):
     ___tablename__= 'response_grades'
     id = db.Column(db.Integer(), primary_key=True)
@@ -207,10 +218,35 @@ class ResponseGrade(db.Model):
     session_id = db.Column(db.Integer(), db.ForeignKey('user_grading_sessions.id'))
 
     @classmethod
+    def count(cls):
+        subquery = db.session.query(User.id)\
+            .join(Role, User.roles).filter(Role.name == 'admin')\
+            .subquery()
+        query = db.session.query(ResponseGrade)\
+            .filter(~ResponseGrade.user_id.in_(subquery))
+
+        return query.count()
+
+    @classmethod
+    def subject_count(cls):
+        subquery = db.session.query(User.id) \
+            .join(Role, User.roles)\
+            .filter(Role.name == 'admin') \
+            .subquery()
+        query = db.session.query(Subject.name, func.count(ResponseGrade.id))\
+            .join(Response)\
+            .join(ResponseGrade)\
+            .filter(~ResponseGrade.user_id.in_(subquery))\
+            .group_by(Subject.name)
+
+        return query.all()
+
+    @classmethod
     def get_grades(cls, user_id, exercise_id):
         query = db.session.query(distinct(Response.id), cls.junk)\
             .outerjoin(cls, and_(cls.response_id == Response.id, cls.user_id == user_id))\
             .filter(Response.exercise_id == exercise_id).order_by(Response.id)
+
         return query.all()
 
     @classmethod
@@ -232,7 +268,9 @@ class Response(db.Model, JsonSerializer):
     subject = db.Column(db.String())
     subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
 
-    # grades = db.relationship('ResponseGrade')
+    @classmethod
+    def count(cls):
+        return db.session.query(cls).count()
 
     @classmethod
     def get(cls, response_id):
