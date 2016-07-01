@@ -1,6 +1,41 @@
 {% extends 'layouts/admin_base.html' %}
 
 {% block content %}
-    <h1> Nothing here yet!</h1>
+    <h1>Grading Overview</h1>
+    <div class="row dashboard-items">
+
+        <div class="col-xs-12 col-sm-6 dashboard-item">
+            <span class="totalResponses dashboard">{{'{0:,}'.format(data.total_responses) }}</span>
+            <h4 class="text-muted">Number of Responses</h4>
+        </div>
+
+        <div class="col-xs-12 col-sm-4 dashboard-item">
+            <span class="percentCompleted dashboard">{{ ((data.total_grades / data.total_responses) * 100) | round(precision=1, method='ceil') }}</span>%
+            <h4 class="text-muted">Percentage Completed</h4>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-xs-12 col-sm-6 dashboard-item">
+            <span class="totalGraded dashboard">{{ '{0:,}'.format(data.total_grades) }}</span>
+            <h4 class="text-muted">Total Responses Graded</h4>
+        </div>
+
+        <div class="col-xs-12 col-sm-4 dashboard-item">
+            <span class="physicsGraded dashboard">{{ '{0:,}'.format(data.total_physics) }}</span>
+            <h4 class="text-muted">Physics Responses Graded</h4>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 dashboard-item">
+            <span class="biologyGraded dashboard">{{ '{0:,}'.format(data.total_biology) }}</span>
+            <h4 class="text-muted">Biology Responses Graded</h4>
+        </div>
+
+    </div>
 
 {% endblock content %}

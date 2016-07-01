@@ -16,7 +16,7 @@ module.exports = {
     entry: {
         app_js: [
             // 'webpack/hot/dev-server',
-            rootAssetPath + '/js/app/main',
+            rootAssetPath + '/js/app/main'
         ],
         app_css: [
             cssAssetPath + '/style',
@@ -60,6 +60,7 @@ module.exports = {
             rootAssetPath: rootAssetPath,
             ignorePaths: ['/css', '/js', '/images', '/pdf', '/build', 'manifest.json']
         }),
-        new ExtractTextPlugin('[name].[chunkhash].css')
+        new ExtractTextPlugin('[name].[chunkhash].css'),
+        new webpack.NoErrorsPlugin()
     ]
 };

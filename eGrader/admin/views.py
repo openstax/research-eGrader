@@ -18,6 +18,7 @@ from eGrader.admin.exports import (list_graded_responses,
                                    list_responses)
 from eGrader.admin.forms import CreateUserForm, UpdateUserForm
 from eGrader.core import db
+from eGrader.grader.models import ResponseGrade, Response, get_admin_metrics
 from eGrader.utils import render_csv
 
 admin_permission = Permission(RoleNeed('admin'))
@@ -32,7 +33,10 @@ admin = Blueprint('admin',
 @admin.route('/', methods=['GET'])
 @admin_permission.require()
 def index():
-    return render_template('admin_index.html', active_page='index')
+    data = get_admin_metrics()
+    return render_template('admin_index.html',
+                           data=data,
+                           active_page='index')
 
 
 @admin.route('/users', methods=['GET', 'POST'])
@@ -87,9 +91,6 @@ def edit_user(user_id):
             db.session.commit()
 
         db.session.commit()
-
-
-
 
         flash('User data updated', 'success')
         return redirect(url_for('admin.manage_users'))
