@@ -22,8 +22,8 @@ def index():
     last_session = UserGradingSession.latest_by_start(current_user.id)
 
     if last_session and not last_session.ended_on:
-        # TODO: Get the last response graded and use that timestamp
-        last_session.ended_on = datetime.utcnow()
+        latest_response = ResponseGrade.latest_by_session_id(last_session.id)
+        last_session.ended_on = latest_response.submitted_on
         db.session.add(last_session)
         db.session.commit()
 
@@ -65,7 +65,5 @@ def index():
             sessions.append(session)
     else:
         sessions = []
-
-    print grading_session_details
 
     return render_template('dashboard/index.html', data=data, sessions=sessions)

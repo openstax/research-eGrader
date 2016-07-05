@@ -242,6 +242,12 @@ class ResponseGrade(db.Model):
         return query.all()
 
     @classmethod
+    def latest_by_session_id(cls, session_id):
+        query = db.session.query(cls).filter(cls.session_id == session_id).order_by(cls.submitted_on.desc())
+
+        return query.first()
+
+    @classmethod
     def get_grades(cls, user_id, exercise_id):
         query = db.session.query(distinct(Response.id), cls.junk)\
             .outerjoin(cls, and_(cls.response_id == Response.id, cls.user_id == user_id))\
@@ -352,7 +358,6 @@ class UserGradingSession(db.Model, JsonSerializer):
     def latest_by_start(cls, user_id):
         return db.session.query(cls) \
             .filter(cls.user_id == user_id) \
-            .filter(cls.ended_on != None) \
             .order_by(cls.started_on.desc()) \
             .first()
 
