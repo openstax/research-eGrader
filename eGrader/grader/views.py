@@ -49,10 +49,11 @@ def grading_connect():
 @socketio.on('disconnect', namespace='/grader/soc')
 def grading_disconnect():
     print('Client disconnected', request.sid)
-    grading_session = session['grading_session']
-    grading_session.ended_on = datetime.utcnow()
-    db.session.add(grading_session)
-    db.session.commit()
+    if 'grading_session' in session and session['grading_session']:
+        grading_session = session['grading_session']
+        grading_session.ended_on = datetime.utcnow()
+        db.session.add(grading_session)
+        db.session.commit()
 
 
 def _get_exercise_response():
