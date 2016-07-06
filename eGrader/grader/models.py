@@ -97,7 +97,6 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None, random=True)
     # Return the first exercise that has responses not yet graded and not set to unqualified
     query = db.session.query(Exercise).join(Response)
 
-
     if subject_id:
         query = query.filter(Exercise.subject_id == subject_id)
 
@@ -110,7 +109,7 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None, random=True)
         query = query.filter(Exercise.chapter_id == chapter_id)
 
     query = query.filter(~Response.id.in_(subq1)).filter(~Exercise.id.in_(subq2))
-
+    query = query.filter(subq3.c.grade_count <= 2)
     ex = query.first()
 
     return ex.id
