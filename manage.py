@@ -118,24 +118,18 @@ def send_test_email():
 
 @manager.command
 def list_routes():
-    import urllib
+    """List available routes in the application"""
     output = []
     for rule in app.url_map.iter_rules():
 
-        options = {}
-        for arg in rule.arguments:
-            options[arg] = "[{0}]".format(arg)
-
         methods = ','.join(rule.methods)
-        url = url_for(rule.endpoint, **options)
-        line = urllib.unquote("{:50s} {:30s} {}".format(
-            rule.endpoint,
-            methods,
-            url))
+        url = str(rule)
+        if '_debug_toolbar' in url:
+            continue
+        line = "{:50s} {:30s} {}".format(rule.endpoint, methods, url)
         output.append(line)
 
-    for line in sorted(output):
-        print(line)
+    print('\n'.join(sorted(output)))
 
 
 @manager.shell
