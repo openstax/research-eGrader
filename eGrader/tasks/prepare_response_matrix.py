@@ -45,7 +45,7 @@ def insert_into(table, values):
 
 @executor(fetch_all=True)
 def get_exercises():
-    sel = db.select([exercises_table.c.id, exercises_table.c.features])
+    sel = db.select([exercises_table.c.id, exercises_table.c.features]).where(exercises_table.c.features == None)
     return sel
 
 
