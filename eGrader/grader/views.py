@@ -32,7 +32,11 @@ def grading_connect():
     # else create a new session
     grading_session = UserGradingSession.latest(current_user.id)
 
-    if grading_session and (datetime.utcnow() - grading_session.ended_on).seconds < 900:
+    if grading_session.ended_on and (datetime.utcnow() - grading_session.ended_on).seconds < 900:
+        session['grading_session'] = grading_session
+        emit('connection', dict(session_id=grading_session.id))
+    elif grading_session and not grading_session.ended_on:
+        session['grading_session'] = grading_session
         emit('connection', dict(session_id=grading_session.id))
     else:
         grading_session = UserGradingSession(
@@ -41,8 +45,9 @@ def grading_connect():
         )
         db.session.add(grading_session)
         db.session.commit()
+        session['grading_session'] = grading_session
         emit('connection', dict(session_id=grading_session.id))
-    session['grading_session'] = grading_session
+
     print('user {0} is grading'.format(current_user.id))
 
 
@@ -51,6 +56,11 @@ def grading_disconnect():
     print('Client disconnected', request.sid)
     if 'grading_session' in session and session['grading_session']:
         grading_session = session['grading_session']
+        grading_session.ended_on = datetime.utcnow()
+        db.session.add(grading_session)
+        db.session.commit()
+    else:
+        grading_session = UserGradingSession.latest(current_user.id)
         grading_session.ended_on = datetime.utcnow()
         db.session.add(grading_session)
         db.session.commit()
