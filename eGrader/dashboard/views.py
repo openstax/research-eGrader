@@ -23,9 +23,10 @@ def index():
 
     if last_session and not last_session.ended_on:
         latest_response = ResponseGrade.latest_by_session_id(last_session.id)
-        last_session.ended_on = latest_response.submitted_on
-        db.session.add(last_session)
-        db.session.commit()
+        if latest_response:
+            last_session.ended_on = latest_response.submitted_on
+            db.session.add(last_session)
+            db.session.commit()
 
     grading_session_metrics = get_grading_session_metrics(current_user.id)
     grading_session_details = get_grading_session_details(current_user.id)
