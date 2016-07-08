@@ -14,7 +14,7 @@ manager = Manager(app)
 @manager.command
 def drop_db():
     if prompt_bool(
-            'Are you sure you want to lose all your data for {0} ? \nThis is process is not reversable'.format(
+            'Are you sure you want to lose all your data for {0} ? \nThis is process is not reversible'.format(
                 app.config['SQLALCHEMY_DATABASE_URI'].split('@')[1])
     ):
         db.drop_all()
@@ -49,6 +49,7 @@ def load_subject_ids():
     update_exercises_with_subject()
     update_responses_with_subject()
     return
+
 
 @manager.command
 def update_book_info():
