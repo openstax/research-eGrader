@@ -349,7 +349,6 @@ class UserGradingSession(db.Model, JsonSerializer):
     def latest(cls, user_id):
         return db.session.query(cls)\
             .filter(cls.user_id == user_id)\
-            .filter(cls.ended_on != None)\
             .order_by(cls.ended_on.desc())\
             .first()
 
