@@ -13,4 +13,5 @@ MAIL_SERVER = secret_settings.MAIL_SERVER
 MAIL_USERNAME = secret_settings.MAIL_USERNAME
 WEBPACK_MANIFEST_PATH = '../eGrader/static/manifest.json'
 SECURITY_PASSWORD_SALT = secret_settings.SECURITY_PASSWORD_SALT
+SLACK_WEBHOOK_URL = secret_settings.SLACK_WEBHOOK_URL
 # WEBPACK_ASSETS_URL = 'http://127.0.0.1:5011/static/build/'

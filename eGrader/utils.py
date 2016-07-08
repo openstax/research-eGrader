@@ -1,11 +1,13 @@
 import csv
+import json
 from StringIO import StringIO
 from functools import wraps
 
+import requests
 import sqlalchemy as db
 from datetime import datetime
 
-from flask import Response
+from flask import current_app, Response
 
 from eGrader.exceptions import api_error_handler
 from jinja2 import Markup
@@ -218,3 +220,11 @@ class MomentJS(object):
             </script>
             """ % (self.timestamp.strftime('%Y-%m-%dT%H:%M:%S Z'),
                    self.timestamp2.strftime('%Y-%m-%dT%H:%M:%S Z')))
+
+
+def send_slack_msg(msg):
+    url = current_app.config['SLACK_WEBHOOK_URL']
+    payload = dict(text=msg)
+    r = requests.post(url, data=json.dumps(payload))
+    if r.status_code is not 200:
+        print('There was an error sending the slack webhook request')

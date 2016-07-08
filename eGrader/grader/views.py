@@ -7,6 +7,7 @@ from flask.ext.security import current_user
 from flask.ext.socketio import emit
 
 from eGrader.grader.forms import GraderForm
+from eGrader.utils import send_slack_msg
 from ..core import db, socketio
 
 from .models import (Exercise,
@@ -46,6 +47,7 @@ def grading_connect():
         db.session.add(grading_session)
         db.session.commit()
         session['grading_session'] = grading_session
+        send_slack_msg('User {} has started grading'.format(current_user.id))
         emit('connection', dict(session_id=grading_session.id))
 
     print('user {0} is grading'.format(current_user.id))
@@ -54,6 +56,7 @@ def grading_connect():
 @socketio.on('disconnect', namespace='/grader/soc')
 def grading_disconnect():
     print('Client disconnected', request.sid)
+    send_slack_msg('User {} has stopped grading'.format(current_user.id))
     if 'grading_session' in session and session['grading_session']:
         grading_session = session['grading_session']
         grading_session.ended_on = datetime.utcnow()
