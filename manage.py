@@ -61,6 +61,13 @@ def update_book_info():
     print('Exercises have been updated with book information')
 
 
+@manager.command
+def update_grading_session_times():
+    from eGrader.tasks.session_fixes import update_grading_sessions_end_times
+    update_grading_sessions_end_times()
+    print('Session end times have been updated')
+
+
 @manager.option('-e', '--email', dest='email')
 @manager.option('-p', '--password', dest='password')
 def create_admin_user(email, password):
