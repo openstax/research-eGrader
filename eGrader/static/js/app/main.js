@@ -8,7 +8,7 @@ import {startMathJax, typesetMath} from "./mathjax.js";
 import SocketManager from "./socket.js";
 import Notes from "./notes.js";
 import DropDown from "./dropdown.js";
-import LocalStorageManager from "./localstorage";
+//import LocalStorageManager from "./localstorage";
 
 window.$ = window.jQuery = $;
 
@@ -21,20 +21,11 @@ var App = {
         // setup interfaces
         this.API = new API();
         this.socketManager = new SocketManager();
-        this.storageManager = new LocalStorageManager();
+        // this.storageManager = new LocalStorageManager();
 
         this.activateEvents();
 
-        // Check localStorage for last exercise
-        let lastExerciseId = this.storageManager.getLastExercise();
-        if (lastExerciseId) {
-            console.log('Last exercise found');
-            this.exerciseId = lastExerciseId;
-            this.loadExercise(lastExerciseId);
-        } else {
-            console.log('No last exercise found');
-            this.getNextExercise();
-        }
+        this.getNextExercise();
     },
 
     activateEvents() {
@@ -46,7 +37,7 @@ var App = {
         this.exerciseLoading();
         let self = this;
         let chapterId = this.chapterId;
-        let exercise = this.API.getNextExercise(self.userId, chapterId)
+        let exercise = this.API.getNextExercise(chapterId)
             .done(function(r) {
                 let exerciseId = r['exercise_id'];
                 self.exerciseId = exerciseId;
@@ -62,7 +53,6 @@ var App = {
 
     loadExercise(exerciseId) {
         let self = this;
-        this.storageManager.setLastExercise(exerciseId);
         this.Notes = new Notes(self.userId, exerciseId);
         let exercise = this.API.getExercise(exerciseId)
             .done(function(r) {

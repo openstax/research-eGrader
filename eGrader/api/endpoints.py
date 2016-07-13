@@ -1,14 +1,13 @@
 from datetime import datetime
-from flask import abort, Blueprint, jsonify, request
-from flask.ext.login import login_required
+from flask import abort, Blueprint, jsonify, request, session
+from flask.ext.login import login_required, current_user
 
 from eGrader.algs.active_learning_minvar import MinVarException
 from eGrader.core import db
 
-from eGrader.accounts.models import User
-
 from eGrader.grader.models import (ExerciseNote,
                                    get_next_exercise_id,
+                                   get_next_response,
                                    get_parsed_exercise,
                                    Response,
                                    ResponseGrade,
@@ -38,27 +37,43 @@ def get_exercise(exercise_id):
 @api.route('/exercise/next', methods=['GET'])
 @login_required
 def get_next_exercise():
-    user_id = request.args.get('user_id', None)
     chapter_id = request.args.get('chapter_id', None)
-    user = User.get(user_id)
 
-    exercise_id = get_next_exercise_id(user_id, user.subject_id, chapter_id=chapter_id, random=True)
+    if 'exercise_id' in session and session['exercise_id']:
+        exercise_id = session['exercise_id']
 
-    if not exercise_id:
-        return jsonify(dict(success=False, message='There are no more exercises for that user'))
+        # Check if the user still has responses to grade for that exercise
+        try:
+            response = get_next_response(current_user.id, exercise_id)
+        except MinVarException:
+            response = None
+
+        if response and exercise_id:
+            session['exercise_id'] = exercise_id
+            return jsonify(dict(success=True, exercise_id=exercise_id))
+        if not response:
+            exercise_id = get_next_exercise_id(current_user.id, current_user.subject_id, chapter_id=chapter_id, random=True)
+            session['exercise_id'] = exercise_id
+            if exercise_id:
+                return jsonify(dict(success=True, exercise_id=exercise_id))
+            else:
+                session['exercise_id'] = None
+                return jsonify(dict(success=False, message='There are no more exercises for that user'))
     else:
-        return jsonify(dict(success=True, exercise_id=exercise_id))
+        exercise_id = get_next_exercise_id(current_user.id, current_user.subject_id, chapter_id=chapter_id, random=True)
+        if exercise_id:
+            session['exercise_id'] = exercise_id
+            return jsonify(dict(success=True, exercise_id=exercise_id))
+        else:
+            return jsonify(dict(success=False, message='There are no more exercises for that user'))
 
 
 @api.route('/response/next', methods=['GET'])
 @login_required
 def next_response():
-    from eGrader.grader.models import get_next_response
-
-    user_id = request.args.get('user_id', None)
     exercise_id = request.args.get('exercise_id', None)
     try:
-        response = get_next_response(user_id, exercise_id)
+        response = get_next_response(current_user.id, exercise_id)
     except MinVarException:
         return jsonify(dict(
             message='There are no more responses available for that exercise',
@@ -104,7 +119,7 @@ def not_qualified():
 @api.route('/exercise/notes', methods=['GET'])
 @login_required
 def get_user_exercise_notes():
-    user_id = request.args.get('user_id', None)
+    user_id = current_user.id
     exercise_id = request.args.get('exercise_id', None)
     notes = ExerciseNote.get_by_user_id(user_id, exercise_id)
     data = [{"id": note.id,

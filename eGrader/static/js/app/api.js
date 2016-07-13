@@ -23,7 +23,7 @@ class API {
             type: 'GET',
             dataType: 'json',
             url: this.rootUrl + resource,
-            data: {user_id: userId, chapter_id:chapter_id}
+            data: { chapter_id: chapter_id }
         });
         
         return response
@@ -35,10 +35,7 @@ class API {
             type: 'GET',
             dataType: 'json',
             url: this.rootUrl + resource,
-            data: {
-                user_id: userId,
-                exercise_id:exerciseId
-            }
+            data: { exercise_id: exerciseId }
         });
 
         return response
