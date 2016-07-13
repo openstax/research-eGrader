@@ -47,9 +47,9 @@ def grading_connect():
         db.session.add(grading_session)
         db.session.commit()
         session['grading_session'] = grading_session
-        send_slack_msg('User {} has started grading'.format(current_user.id))
-        emit('connection', dict(session_id=grading_session.id))
 
+        emit('connection', dict(session_id=grading_session.id))
+    send_slack_msg('User {} has started grading'.format(current_user.id))
     print('user {0} is grading'.format(current_user.id))
 
 
