@@ -122,6 +122,7 @@ def get_parsed_exercise(exercise_id):
     exercise = Exercise.get(exercise_id)
 
     subject = Subject.get(exercise.subject_id)
+    answer_html = 'Question not supplied with a correct answer'
 
     if exercise.book_row_id:
         book_url = '{0}:{1}'.format(subject.book_url, exercise.book_row_id)
