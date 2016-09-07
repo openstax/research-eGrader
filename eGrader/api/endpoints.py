@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import abort, Blueprint, jsonify, request, session
-from flask.ext.login import login_required, current_user
+from flask_login import login_required, current_user
 
 from eGrader.algs.active_learning_minvar import MinVarException
 from eGrader.core import db
