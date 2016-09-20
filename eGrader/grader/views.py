@@ -2,6 +2,7 @@ import json
 
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, session, url_for
+from flask import current_app
 from flask.ext.login import login_required
 from flask.ext.security import current_user
 from flask.ext.socketio import emit
@@ -49,14 +50,17 @@ def grading_connect():
         session['grading_session'] = grading_session
 
         emit('connection', dict(session_id=grading_session.id))
-    send_slack_msg('User {} has started grading'.format(current_user.id))
+
+    if not current_app.config['DEBUG']:
+        send_slack_msg('User {} has started grading'.format(current_user.id))
     print('user {0} is grading'.format(current_user.id))
 
 
 @socketio.on('disconnect', namespace='/grader/soc')
 def grading_disconnect():
     print('Client disconnected', request.sid)
-    send_slack_msg('User {} has stopped grading'.format(current_user.id))
+    if not current_app.config['DEBUG']:
+        send_slack_msg('User {} has stopped grading'.format(current_user.id))
     if 'grading_session' in session and session['grading_session']:
         grading_session = session['grading_session']
         grading_session.ended_on = datetime.utcnow()

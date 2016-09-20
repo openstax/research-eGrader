@@ -39,6 +39,7 @@ def get_exercise(exercise_id):
 def get_next_exercise():
     chapter_id = request.args.get('chapter_id', None)
 
+    # Check and see if there is an exercise in the session.
     if 'exercise_id' in session and session['exercise_id']:
         exercise_id = session['exercise_id']
 
@@ -48,11 +49,16 @@ def get_next_exercise():
         except MinVarException:
             response = None
 
+        # If there is a response available return the exercise_id
         if response and exercise_id:
             session['exercise_id'] = exercise_id
             return jsonify(dict(success=True, exercise_id=exercise_id))
+
+        # If there is no response that means we need a new exercise
         if not response:
-            exercise_id = get_next_exercise_id(current_user.id, current_user.subject_id, chapter_id=chapter_id, random=True)
+            exercise_id = get_next_exercise_id(current_user.id,
+                                               current_user.subject_id,
+                                               chapter_id=chapter_id)
             session['exercise_id'] = exercise_id
             if exercise_id:
                 return jsonify(dict(success=True, exercise_id=exercise_id))
@@ -60,7 +66,9 @@ def get_next_exercise():
                 session['exercise_id'] = None
                 return jsonify(dict(success=False, message='There are no more exercises for that user'))
     else:
-        exercise_id = get_next_exercise_id(current_user.id, current_user.subject_id, chapter_id=chapter_id, random=True)
+        exercise_id = get_next_exercise_id(current_user.id,
+                                           current_user.subject_id,
+                                           chapter_id=chapter_id)
         if exercise_id:
             session['exercise_id'] = exercise_id
             return jsonify(dict(success=True, exercise_id=exercise_id))
@@ -78,7 +86,13 @@ def next_response():
         return jsonify(dict(
             message='There are no more responses available for that exercise',
             success=False))
-    return jsonify(dict(success=True, response=response.to_json()))
+
+    if response:
+        return jsonify(dict(success=True, response=response.to_json()))
+    else:
+        return jsonify(dict(
+            message='There are no more responses available for that exercise',
+            success=False))
 
 
 @api.route('/response/submit', methods=['POST'])
