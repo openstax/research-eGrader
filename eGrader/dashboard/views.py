@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template
-from flask.ext.login import current_user
-from flask.ext.security import login_required
+from flask_login import current_user
+from flask_security import login_required
 
 from eGrader.core import db
 from eGrader.grader.models import (get_grading_session_details,

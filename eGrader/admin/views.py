@@ -6,7 +6,7 @@ from flask import (current_app,
                    render_template,
                    request,
                    url_for)
-from flask.ext.principal import Permission, RoleNeed
+from flask_principal import Permission, RoleNeed
 from flask_security.utils import encrypt_password
 
 

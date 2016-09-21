@@ -1,6 +1,6 @@
 from factory import LazyAttribute, Sequence
 from factory.alchemy import SQLAlchemyModelFactory
-from flask.ext.security.utils import encrypt_password
+from flask_security.utils import encrypt_password
 
 from eGrader.core import db
 from eGrader.models import User
