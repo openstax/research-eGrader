@@ -3,9 +3,9 @@ import json
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, session, url_for
 from flask import current_app
-from flask.ext.login import login_required
-from flask.ext.security import current_user
-from flask.ext.socketio import emit
+from flask_login import login_required
+from flask_security import current_user
+from flask_socketio import emit
 
 from eGrader.grader.forms import GraderForm
 from eGrader.utils import send_slack_msg

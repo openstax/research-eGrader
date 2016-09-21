@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import url_for
-from flask.ext.script import Manager, prompt_bool
-from flask.ext.security import utils
+from flask_script import Manager, prompt_bool
+from flask_security import utils
 
 from eGrader import create_app
 from eGrader.models import *
@@ -108,7 +108,7 @@ def create_user(email, password, subject_id):
 
 @manager.command
 def send_test_email():
-    from flask.ext.mail import Message
+    from flask_mail import Message
     from eGrader.core import mail
 
     to = ['labs@openstax.org']
