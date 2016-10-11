@@ -2,6 +2,14 @@
 
 {% extends 'layouts/base.html' %}
 
+{% block meta %}
+    {{ super() }}
+    <meta property="og:url" content="{{ url_for('viewer.exercise_viewer', exercise_uid=exercise.uid) }}">
+    <meta property="og:title" content="eGrader Exercise Viewer of Excellence">
+    <meta property="og:description" content="{{ exercise.exercise_html }}">
+    <meta property="og:site_name" content="OpenStax eGrader">
+{% endblock meta  %}
+
 {% block styles %}
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet"
