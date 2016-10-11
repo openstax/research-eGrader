@@ -2,13 +2,13 @@
 
 {% extends 'layouts/base.html' %}
 
-{% block meta %}
+{% block metas %}
     {{ super() }}
     <meta property="og:url" content="{{ request.url }}">
     <meta property="og:title" content="eGrader Exercise Viewer of Excellence">
     <meta property="og:description" content="{{ exercise.exercise_html }}">
     <meta property="og:site_name" content="OpenStax eGrader">
-{% endblock meta  %}
+{% endblock metas  %}
 
 {% block styles %}
     <!-- Compiled and minified CSS -->
