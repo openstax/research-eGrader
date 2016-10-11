@@ -1,0 +1,78 @@
+
+
+{% extends 'layouts/base.html' %}
+
+{% block styles %}
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
+
+    <style>
+        body {
+            background-color: powderblue;
+        }
+
+        .exercise-text {
+            font-size: 2em;
+        }
+
+        .answer-text {
+            font-size: 1.2em;
+        }
+
+        li {
+            padding-bottom: 10px;
+        }
+
+        img {
+            display:block;
+        }
+    </style>
+    <script src="//cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-MML-AM_HTMLorMML-full&amp;delayStartupUntil=configured"></script>
+
+{% endblock styles %}
+
+
+{% block content %}
+
+    <div class="row">
+        <div class="col s12 m8 offset-m2">
+            <div class="card">
+                <div class="card-content black-text">
+                    <span class="card-title">Exercise Text</span> <span class="badge">{{ exercise.uid }}</span>
+                    <div class="exercise-text">
+                        {{ exercise.exercise_html | safe }}
+                    </div>
+                </div>
+                <div class="card-content choices">
+                <span class="card-title"> Choices</span>
+                    <div class="answer-text">
+                        <ol>
+                            {% for choice in exercise.choices %}
+                                <li>{{ choice.content_html | safe }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+
+{% block scripts %}
+    {{ javascript_tag('exercise_js') | safe }}
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
+
+    <script>
+        window.App.start();
+
+        $(document).ready(function() {
+            window.App.typeSetMath()
+        })
+    </script>
+
+{% endblock scripts %}
