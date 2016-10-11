@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_security import SQLAlchemyUserDatastore
 
+from eGrader.viewer.views import viewer
 from .accounts.forms import ExtendedRegisterForm
 from .admin.views import admin
 from .accounts.models import User, Role
@@ -44,5 +45,6 @@ def create_app(package_name, package_path, settings=None):
     app.register_blueprint(grader)
     app.register_blueprint(api)
     app.register_blueprint(admin)
+    app.register_blueprint(viewer)
 
     return app

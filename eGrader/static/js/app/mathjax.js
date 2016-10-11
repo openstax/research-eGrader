@@ -64,7 +64,7 @@ typesetMath = function(root) {
   }
 };
 
-startMathJax = function() {
+startMathJax = function(callback) {
   var MATHJAX_CONFIG, configuredCallback, ref;
   MATHJAX_CONFIG = {
     showProcessingMessages: false,
@@ -96,6 +96,11 @@ startMathJax = function() {
     MATHJAX_CONFIG.AuthorInit = configuredCallback;
     return window.MathJax = MATHJAX_CONFIG;
   }
+
+  if (typeof(callback) == 'function') {
+    callback()
+  }
+
 };
 
 export {startMathJax, typesetMath}

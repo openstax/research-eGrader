@@ -21,6 +21,9 @@ module.exports = {
         app_css: [
             cssAssetPath + '/style',
             cssAssetPath + '/dashboard'
+        ],
+        exercise_js: [
+            rootAssetPath + '/js/app/exerciseViewer'
         ]
     },
     output: {
