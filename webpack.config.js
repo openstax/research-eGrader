@@ -14,11 +14,9 @@ var buildOutputPath = path.join(__dirname, 'eGrader/static/build/');
 module.exports = {
     context: path.join(__dirname, 'eGrader'),
     entry: {
-        app_js: [
+        app: [
             // 'webpack/hot/dev-server',
-            rootAssetPath + '/js/app/main'
-        ],
-        app_css: [
+            rootAssetPath + '/js/app/main',
             cssAssetPath + '/style',
             cssAssetPath + '/dashboard'
         ],
@@ -28,9 +26,8 @@ module.exports = {
     },
     output: {
         path: buildOutputPath,
-        publicPath: publicHost + '/static/',
-        filename: '[name].[hash].js',
-        chunkFilename: '[id].[chunkhash].js'
+        publicPath: publicHost + '/',
+        filename: '[name].js',
     },
     resolve: {
         extensions: ['', '.js', '.jsx', '.css']
@@ -59,11 +56,11 @@ module.exports = {
         ]
     },
     plugins: [
-        new ManifestRevisionPlugin(rootAssetPath + '/manifest.json', {
+        new ManifestRevisionPlugin(path.join('eGrader', 'static', 'manifest.json'), {
             rootAssetPath: rootAssetPath,
             ignorePaths: ['/css', '/js', '/images', '/pdf', '/build', 'manifest.json']
         }),
-        new ExtractTextPlugin('[name].[chunkhash].css'),
+        new ExtractTextPlugin('[name].css'),
         new webpack.NoErrorsPlugin()
     ]
 };

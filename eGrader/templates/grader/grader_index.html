@@ -3,7 +3,7 @@
 {% block styles %}
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    {{ stylesheet_tag('app_css') | safe }}
+    {{ stylesheet_tag('app') | safe }}
     <script src="//cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-MML-AM_HTMLorMML-full&amp;delayStartupUntil=configured"></script>
 
 {% endblock styles %}
@@ -137,7 +137,7 @@
 
 {% block scripts %}
     {{ super() }}
-    {{ javascript_tag('app_js') | safe }}
+    {{ javascript_tag('app') | safe }}
 
     <script>
 
