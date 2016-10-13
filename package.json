@@ -23,7 +23,7 @@
     "extract-text-webpack-plugin": "^1.0.1",
     "d3": "^4.0.0",
     "jquery": "^2.2.3",
-    "manifest-revision-webpack-plugin": "^0.1.0",
+    "manifest-revision-webpack-plugin": "^0.3.0",
     "noty": "^2.3.8",
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.4.6",
