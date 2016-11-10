@@ -34,7 +34,9 @@ def grading_connect():
     # else create a new session
     grading_session = UserGradingSession.latest(current_user.id)
 
-    if grading_session.ended_on and (datetime.utcnow() - grading_session.ended_on).seconds < 900:
+    if grading_session \
+            and grading_session.ended_on \
+            and (datetime.utcnow() - grading_session.ended_on).seconds < 900:
         session['grading_session'] = grading_session
         emit('connection', dict(session_id=grading_session.id))
     elif grading_session and not grading_session.ended_on:

@@ -155,13 +155,6 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None):
     unqual_subq = db.session.query(UserUnqualifiedExercise.exercise_id) \
         .filter(UserGradingSession.user_id == user_id).subquery()
 
-    # A subquery count of all the grades for every exercise
-    # global_grade_subq = db.session.query(func.distinct(Exercise.id).label('exercise_id'),
-    #                                      func.count(func.coalesce(ResponseGrade.id, None)).label('grade_count')) \
-    #     .join(Response) \
-    #     .outerjoin(ResponseGrade) \
-    #     .group_by(Exercise.id).subquery()
-
     # Create body of the query which is Exercises and Responses ie. SELECT * FROM exercises INNER JOIN responses;
     exercises = db.session.query(Exercise).join(Response)
 
@@ -174,7 +167,8 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None):
         exercises = exercises.filter(Exercise.chapter_id == chapter_id)
 
     # Filter out anything graded by the same user and marked as unqualified
-    exercises = exercises.filter(~Response.id.in_(user_subq)).filter(~Exercise.id.in_(unqual_subq))
+    exercises = exercises.filter(~Response.id.in_(user_subq))\
+        .filter(~Exercise.id.in_(unqual_subq))
 
 
     # Get 100 exercises in random order and get the first that is unresolved.
@@ -246,9 +240,11 @@ def get_grading_session_details(user_id):
                              func.count(ResponseGrade.id),
                              UserGradingSession.started_on,
                              UserGradingSession.ended_on,
-                             label('time_grading', UserGradingSession.ended_on - UserGradingSession.started_on))\
-        .join(ResponseGrade, ResponseGrade.session_id == UserGradingSession.id)\
-        .filter(UserGradingSession.user_id == user_id, UserGradingSession.ended_on != None)\
+                             label('time_grading',
+                                   UserGradingSession.ended_on - UserGradingSession.started_on)) \
+        .join(ResponseGrade, ResponseGrade.session_id == UserGradingSession.id) \
+        .filter(UserGradingSession.user_id == user_id,
+                UserGradingSession.ended_on != None)\
         .group_by(UserGradingSession.id,
                   UserGradingSession.started_on,
                   UserGradingSession.ended_on)\
