@@ -1,7 +1,7 @@
 from eGrader.core import db
 from eGrader.models import ResponseGrade, Response, Exercise, Subject, UserGradingSession, User
 
-admin_users = [3, 9, 10, 11, 12, 20, 24]
+admin_users = [3, 9, 10, 11, 12, 20, 24, 25, 26]
 
 
 def list_graded_responses():
@@ -70,3 +70,28 @@ def list_responses():
                                  ).join(Subject)
 
     return responses.all()
+
+
+def list_all_results():
+    results = db.session.query(Response.id.label('response_id'),
+                           Response.step_id,
+                           Response.deidentifier,
+                           User.id.label('user_id'),
+                           ResponseGrade.score,
+                           ResponseGrade.junk,
+                           ResponseGrade.misconception,
+                           Response.free_response,
+                           Response.subject_id,
+                           Subject.name.label('subject_name'),
+                           Response.exercise_id,
+                           Exercise.uid,
+                           Exercise.api_url,
+                           Exercise.chapter_id,
+                           Exercise.section_id,
+                           Response.correct,
+                           ResponseGrade.submitted_on
+    ).join(ResponseGrade).join(User).join(Exercise).join(Subject)
+
+    results = results.filter(~User.id.in_(admin_users))
+
+    return results.all()

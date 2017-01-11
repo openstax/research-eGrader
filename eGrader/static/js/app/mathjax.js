@@ -16,8 +16,6 @@ MATH_ML_SELECTOR = "math:not(." + MATH_RENDERED_CLASS + ")";
 
 COMBINED_MATH_SELECTOR = MATH_DATA_SELECTOR + ", " + MATH_ML_SELECTOR;
 
-console.log(COMBINED_MATH_SELECTOR);
-
 setAsRendered = function(node, type) {
   if (type == null) {
     type = 'mathjax';

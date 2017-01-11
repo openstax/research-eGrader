@@ -39,7 +39,7 @@ def to_csv(field_names, collection):
         return {att: get_att(model, att) for att in field_names}
 
     def make_writer(sio):
-        return csv.DictWriter(sio, field_names, dialect='excel-tab')
+        return csv.DictWriter(sio, field_names, dialect='excel')
 
     # yield header
     sio = StringIO()

@@ -15,7 +15,8 @@ from eGrader.admin.exports import (list_graded_responses,
                                    list_exercises,
                                    list_sessions,
                                    list_users,
-                                   list_responses)
+                                   list_responses,
+                                   list_all_results)
 from eGrader.admin.forms import CreateUserForm, UpdateUserForm
 from eGrader.core import db
 from eGrader.grader.models import ResponseGrade, Response, get_admin_metrics
@@ -179,3 +180,27 @@ def export_responses():
             'deidentifier']
 
     return render_csv(atts, responses, 'responses')
+
+
+@admin.route('/export/all')
+@admin_permission.require()
+def export_all():
+    all = list_all_results()
+    atts = ['response_id',
+            'step_id',
+            'deidentifier',
+            'user_id',
+            'score',
+            'junk',
+            'misconception',
+            'free_response',
+            'subject_id',
+            'subject_name',
+            'exercise_id',
+            'uid',
+            'api_url',
+            'chapter_id',
+            'section_id',
+            'correct',
+            'submitted_on']
+    return render_csv(atts, all, 'big_daddy_export')

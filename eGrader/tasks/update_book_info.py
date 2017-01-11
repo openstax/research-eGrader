@@ -3,6 +3,7 @@ import csv
 from eGrader.core import db
 from eGrader.models import Exercise
 
+
 def get_rows(filename):
     with open(filename, 'r') as csvfile:
         datareader = csv.DictReader(csvfile)
