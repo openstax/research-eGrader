@@ -1,11 +1,13 @@
 import numpy as np
+from datetime import datetime
 
 from sqlalchemy import and_, func
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
 from sqlalchemy.sql.expression import distinct, extract, label
 
 from eGrader.accounts.models import Role, User
-from eGrader.algs.active_learning_minvar import train_random_forest, get_min_var_idx
+from eGrader.algs.active_learning_minvar import train_random_forest, \
+    get_min_var_idx
 from eGrader.core import db
 
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
@@ -51,7 +53,8 @@ def determine_unresolved(grades):
 
 
 def get_exercise_responses(exercise_id):
-    responses = db.session.query(Response).filter(Response.exercise_id == exercise_id).all()
+    responses = db.session.query(Response).filter(
+        Response.exercise_id == exercise_id).all()
     for response in responses:
         yield response
 
@@ -59,9 +62,11 @@ def get_exercise_responses(exercise_id):
 def get_exercise_grade_counts(exercise_id):
     responses = db.session.query(Response.id,
                                  func.count(func.distinct(ResponseGrade.score)),
-                                 func.count(func.distinct(ResponseGrade.misconception)),
+                                 func.count(func.distinct(
+                                     ResponseGrade.misconception)),
                                  func.count(func.distinct(ResponseGrade.junk)),
-                                 func.count(func.coalesce(ResponseGrade.id, None))) \
+                                 func.count(
+                                     func.coalesce(ResponseGrade.id, None))) \
         .outerjoin(ResponseGrade) \
         .filter(Response.exercise_id == exercise_id) \
         .group_by(Response.id).all()
@@ -153,6 +158,7 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None):
     """
 
     # A query of responses graded by the user
+
     # A sub-query of responses graded by the user
     user_subq = db.session.query(ResponseGrade.response_id) \
         .filter(ResponseGrade.user_id == user_id).subquery()
@@ -164,18 +170,17 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None):
     # Create body of the query which is Exercises and Responses ie. SELECT * FROM exercises INNER JOIN responses;
     exercises = db.session.query(Exercise).join(Response)
 
-    # Filter by subject_id
+    # Filter by optional subject_id
     if subject_id:
         exercises = exercises.filter(Exercise.subject_id == subject_id)
 
-    # Filter by chapter_id if it is included
+    # Filter by optional chapter_id
     if chapter_id:
         exercises = exercises.filter(Exercise.chapter_id == chapter_id)
 
     # Filter out anything graded by the same user and marked as unqualified
-    exercises = exercises.filter(~Response.id.in_(user_subq))\
+    exercises = exercises.filter(~Response.id.in_(user_subq)) \
         .filter(~Exercise.id.in_(unqual_subq))
-
 
     # Get 100 exercises in random order and get the first that is unresolved.
     exercises = exercises.order_by(func.random()).limit(100).all()
@@ -227,8 +232,10 @@ def get_parsed_exercise(exercise_id):
 
 def get_grading_session_metrics(user_id):
     subq = db.session.query(ResponseGrade.session_id.label('session_id'),
-                            func.count(ResponseGrade.id).label('responses_graded'),
-                            label('time_grading', UserGradingSession.ended_on - UserGradingSession.started_on)) \
+                            func.count(ResponseGrade.id).label(
+                                'responses_graded'),
+                            label('time_grading',
+                                  UserGradingSession.ended_on - UserGradingSession.started_on)) \
         .join(UserGradingSession) \
         .filter(UserGradingSession.user_id == user_id) \
         .group_by(ResponseGrade.session_id,
@@ -251,27 +258,28 @@ def get_grading_session_details(user_id):
                                    UserGradingSession.ended_on - UserGradingSession.started_on)) \
         .join(ResponseGrade, ResponseGrade.session_id == UserGradingSession.id) \
         .filter(UserGradingSession.user_id == user_id,
-                UserGradingSession.ended_on != None)\
+                UserGradingSession.ended_on != None) \
         .group_by(UserGradingSession.id,
                   UserGradingSession.started_on,
-                  UserGradingSession.ended_on)\
+                  UserGradingSession.ended_on) \
         .order_by(UserGradingSession.started_on)
 
     return query.all()
 
 
 def get_graded_count(exercise_id):
-    query = db.session.query(Response.id, func.count(func.coalesce(ResponseGrade.id, None)))\
-        .outerjoin(ResponseGrade)\
-        .filter(Response.exercise_id == exercise_id)\
-        .group_by(Response.id)\
+    query = db.session.query(Response.id,
+                             func.count(func.coalesce(ResponseGrade.id, None))) \
+        .outerjoin(ResponseGrade) \
+        .filter(Response.exercise_id == exercise_id) \
+        .group_by(Response.id) \
         .order_by(Response.id)
 
     return query.all()
 
 
 def get_admin_metrics():
-    subject_count= ResponseGrade.subject_count()
+    subject_count = ResponseGrade.subject_count()
     data = dict(total_grades=ResponseGrade.count(),
                 total_responses=Response.count(),
                 total_physics=subject_count[0][1],
@@ -281,7 +289,7 @@ def get_admin_metrics():
 
 
 class ResponseGrade(db.Model):
-    ___tablename__= 'response_grades'
+    ___tablename__ = 'response_grades'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
     response_id = db.Column(db.Integer(), db.ForeignKey('responses.id'))
@@ -291,14 +299,15 @@ class ResponseGrade(db.Model):
     feedback_id = db.Column(db.Integer())
     started_on = db.Column(db.DateTime())
     submitted_on = db.Column(db.DateTime())
-    session_id = db.Column(db.Integer(), db.ForeignKey('user_grading_sessions.id'))
+    session_id = db.Column(db.Integer(),
+                           db.ForeignKey('user_grading_sessions.id'))
 
     @classmethod
     def count(cls):
-        subquery = db.session.query(User.id)\
-            .join(Role, User.roles).filter(Role.name == 'admin')\
+        subquery = db.session.query(User.id) \
+            .join(Role, User.roles).filter(Role.name == 'admin') \
             .subquery()
-        query = db.session.query(ResponseGrade)\
+        query = db.session.query(ResponseGrade) \
             .filter(~ResponseGrade.user_id.in_(subquery))
 
         return query.count()
@@ -306,29 +315,30 @@ class ResponseGrade(db.Model):
     @classmethod
     def subject_count(cls):
         subquery = db.session.query(User.id) \
-            .join(Role, User.roles)\
+            .join(Role, User.roles) \
             .filter(Role.name == 'admin') \
             .subquery()
-        query = db.session.query(Subject.name, func.count(ResponseGrade.id))\
-            .join(Response)\
-            .join(ResponseGrade)\
-            .filter(~ResponseGrade.user_id.in_(subquery))\
+        query = db.session.query(Subject.name, func.count(ResponseGrade.id)) \
+            .join(Response) \
+            .join(ResponseGrade) \
+            .filter(~ResponseGrade.user_id.in_(subquery)) \
             .group_by(Subject.name)
 
         return query.all()
 
     @classmethod
     def latest_by_session_id(cls, session_id):
-        query = db.session.query(cls)\
-            .filter(cls.session_id == session_id)\
+        query = db.session.query(cls) \
+            .filter(cls.session_id == session_id) \
             .order_by(cls.submitted_on.desc())
 
         return query.first()
 
     @classmethod
     def get_grades(cls, user_id, exercise_id):
-        query = db.session.query(distinct(Response.id), cls.junk)\
-            .outerjoin(cls, and_(cls.response_id == Response.id, cls.user_id == user_id))\
+        query = db.session.query(distinct(Response.id), cls.junk) \
+            .outerjoin(cls, and_(cls.response_id == Response.id,
+                                 cls.user_id == user_id)) \
             .filter(Response.exercise_id == exercise_id).order_by(Response.id)
 
         return query.all()
@@ -340,17 +350,22 @@ class ResponseGrade(db.Model):
 
 class Response(db.Model, JsonSerializer):
     __tablename__ = 'responses'
-    id = db.Column(db.Integer(), primary_key=True)  # The corresponding columns in the spreadsheet
-    external_id = db.Column(db.Integer())           # X.1
-    step_id = db.Column(db.Integer(), unique=True)  # Basically the unique id of the response
-    deidentifier = db.Column(db.String())           # Deidentifier
-    free_response = db.Column(db.Text())            # Free.Response
-    correct = db.Column(db.Boolean())               # Correct.
-    correct_answer_id = db.Column(db.Integer())     # Correct.Answer.Id
-    exercise_type = db.Column(db.String())          # Exercise.type
+    id = db.Column(db.Integer(),
+                   primary_key=True)  # The corresponding columns in the spreadsheet
+    external_id = db.Column(db.Integer())  # X.1
+    step_id = db.Column(db.Integer(),
+                        unique=True)  # Basically the unique id of the response
+    deidentifier = db.Column(db.String())  # Deidentifier
+    free_response = db.Column(db.Text())  # Free.Response
+    correct = db.Column(db.Boolean())  # Correct.
+    correct_answer_id = db.Column(db.Integer())  # Correct.Answer.Id
+    exercise_type = db.Column(db.String())  # Exercise.type
     exercise_id = db.Column(db.Integer(), db.ForeignKey('exercises.id'))
     subject = db.Column(db.String())
     subject_id = db.Column(db.Integer(), db.ForeignKey('subjects.id'))
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow())
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow(),
+                           onupdate=datetime.utcnow())
 
     @classmethod
     def count(cls):
@@ -362,35 +377,38 @@ class Response(db.Model, JsonSerializer):
 
     @classmethod
     def all_by_exercise_id(cls, exercise_id):
-        return db.session.query(cls)\
-            .filter(cls.exercise_id == exercise_id)\
-            .order_by(cls.id)\
+        return db.session.query(cls) \
+            .filter(cls.exercise_id == exercise_id) \
+            .order_by(cls.id) \
             .all()
 
     @classmethod
     def all_by_exercise_id_excluding_user(cls, exercise_id, user_id):
-        return db.session.query(cls)\
-            .filter(cls.exercise_id == exercise_id)\
-            .filter(cls.user_id != user_id)\
-            .order_by(cls.id)\
+        return db.session.query(cls) \
+            .filter(cls.exercise_id == exercise_id) \
+            .filter(cls.user_id != user_id) \
+            .order_by(cls.id) \
             .all()
-
-
 
     @classmethod
     def get_random_ungraded_response(cls, user_id, exercise_id):
         subquery = db.session.query(ResponseGrade.response_id) \
             .join(Response).filter(ResponseGrade.user_id == user_id).subquery()
-        query = db.session.query(Response).filter(Response.exercise_id == exercise_id) \
+        query = db.session.query(Response).filter(
+            Response.exercise_id == exercise_id) \
             .filter(~Response.id.in_(subquery)).order_by(func.random())
         return query.first()
 
     def grade_counts(self):
         response = db.session.query(Response.id,
-                                    func.count(func.distinct(ResponseGrade.score)),
-                                    func.count(func.distinct(ResponseGrade.misconception)),
-                                    func.count(func.distinct(ResponseGrade.junk)),
-                                    func.count(func.coalesce(ResponseGrade.id, None))) \
+                                    func.count(
+                                        func.distinct(ResponseGrade.score)),
+                                    func.count(func.distinct(
+                                        ResponseGrade.misconception)),
+                                    func.count(
+                                        func.distinct(ResponseGrade.junk)),
+                                    func.count(
+                                        func.coalesce(ResponseGrade.id, None))) \
             .outerjoin(ResponseGrade) \
             .filter(Response.id == self.id) \
             .group_by(Response.id)
@@ -425,8 +443,8 @@ class Response(db.Model, JsonSerializer):
     @property
     def is_unresolved(self):
         """
-        A response can be resolved if there is a majority vote on the label. If there is not a majority vote
-        then the response is unresolved.
+        A response can be resolved if there is a majority vote on the label.
+        If there is not a majority vote then the response is unresolved.
 
         Returns
         -------
@@ -464,6 +482,9 @@ class Exercise(db.Model, JsonSerializer):
     section_id = db.Column(db.Integer())
     book_row_id = db.Column(db.Integer())
     vocab = db.Column(ARRAY(db.String()))
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow())
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow(),
+                           onupdate=datetime.utcnow())
 
     responses = db.relationship('Response')
 
@@ -496,9 +517,9 @@ class Exercise(db.Model, JsonSerializer):
         user_subq = db.session.query(ResponseGrade.response_id) \
             .filter(ResponseGrade.user_id == user_id).subquery()
 
-        responses = db.session.query(Response)\
-            .filter(Response.exercise_id == self.id)\
-            .filter(~Response.id.in_(user_subq))\
+        responses = db.session.query(Response) \
+            .filter(Response.exercise_id == self.id) \
+            .filter(~Response.id.in_(user_subq)) \
             .all()
         for response in responses:
             if response.is_unresolved:
@@ -515,8 +536,8 @@ class ExerciseNote(db.Model, JsonSerializer):
 
     @classmethod
     def get_by_user_id(cls, user_id, exercise_id):
-        return db.session.query(cls)\
-            .filter(cls.user_id == user_id, cls.exercise_id == exercise_id)\
+        return db.session.query(cls) \
+            .filter(cls.user_id == user_id, cls.exercise_id == exercise_id) \
             .order_by(cls.created_on).all()
 
 
@@ -533,9 +554,9 @@ class UserGradingSession(db.Model, JsonSerializer):
 
     @classmethod
     def latest(cls, user_id):
-        return db.session.query(cls)\
-            .filter(cls.user_id == user_id)\
-            .order_by(cls.ended_on.desc())\
+        return db.session.query(cls) \
+            .filter(cls.user_id == user_id) \
+            .order_by(cls.ended_on.desc()) \
             .first()
 
     @classmethod
