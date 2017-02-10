@@ -1,7 +1,10 @@
-import numpy as np
+import logging
+import os
 from datetime import datetime
 
-from sqlalchemy import and_, func
+import numpy as np
+from sklearn.externals import joblib
+from sqlalchemy import and_, func, or_
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
 from sqlalchemy.sql.expression import distinct, extract, label
 
@@ -13,6 +16,12 @@ from eGrader.core import db
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
 
 from eGrader.utils import JsonSerializer
+
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def determine_unresolved(grades):
@@ -94,8 +103,9 @@ def get_next_response(user_id, exercise_id):
 
     # Get the global (all graders) count for each response
     grade_counts = get_graded_count(exercise_id)
-    print ('The amount of grades', len(grades))
-    print('Printing Grades: ', grades)
+    log.info('The amount of grades for exercise: {0} is {1}'.format(
+        exercise_id, len(grades)))
+    log.info(grades)
 
     # Make the labels array
     labels = [grade[1] for grade in grades]
@@ -107,9 +117,6 @@ def get_next_response(user_id, exercise_id):
 
     exercise = Exercise.get(exercise_id)
 
-    if exercise.has_unresolved_responses:
-        return exercise.get_unresolved_response(user_id)
-
     if all(v is None for v in labels):
         response = Response.get_random_ungraded_response(user_id, exercise_id)
         return response
@@ -117,80 +124,181 @@ def get_next_response(user_id, exercise_id):
         responses = Response.all_by_exercise_id(exercise_id)
         forest_name = exercise.forest_name
         vocab = exercise.vocab
+
+        features = np.array(exercise.features)
+        obs_idx = np.where(~np.isnan(labels_array))[0]
+        log.info(obs_idx)
+
         if forest_name:
+            forest_path = exercise.forest_name
+            log.info(forest_path)
             # Load forest and get next best response
-            print('load forest')
+            forest = joblib.load(forest_path)
         else:
             # Create random forest, predict best response, and save to disk.
             # TODO: save forest to disk
-            features = np.array(exercise.features)
-            obs_idx = np.where(~np.isnan(labels_array))[0]
-            print obs_idx
+            filename = 'exercise_{0}.pkl'.format(exercise_id)
+            log.info(filename)
+            forest_path = os.path.join(HERE, '../algs/data', filename)
+            log.info(forest_path)
             forest = train_random_forest(features[obs_idx],
                                          labels_array[obs_idx])
-            print forest
-            prediction_idx = get_min_var_idx(features,
-                                             labels_array,
-                                             vocab,
-                                             forest,
-                                             global_grade_count_array,
-                                             sample_limit=30)
-            print(responses[prediction_idx])
+
+            joblib.dump(forest, forest_path)
+
+            exercise.forest_name = forest_path
+            db.session.add(exercise)
+            db.session.commit()
+
+
+        prediction_idx = get_min_var_idx(features,
+                                         labels_array,
+                                         vocab,
+                                         forest,
+                                         global_grade_count_array,
+                                         sample_limit=30)
         return responses[prediction_idx]
 
 
 def get_next_exercise_id(user_id, subject_id=None, chapter_id=None):
     """
-    Get the next exercise with responses that the grader is able to grade.
+    Get the next exercise prioritized on if there are any unresolved responses
+    for that exercise. Prioritization is based on what is unresolved for that
+    response. If there are no unresolved responses an unobserved response is
+    returned.
+
+    * Unresolved responses - these are responses that do not have a majority
+      vote based on the grades given for the response.
+
+    * Examples *
+
+    1. If a response only has 1 grade then it is unresolved.
+    2. If a response has 2 total grades with junk, score, misconception having 2
+      different (distinct) grades one of the three criteria is unresolved.
+    3. If a response has 3 total grades and score has 3 different (distinct)
+      grades the response is unresolved for the score criteria.
+
+    4. If there are no unresolved responses an unobserved exercise is returned.
+
+    * Unobserved response/exercise- an exercise/ response that has not been
+      graded by any graders.
 
     Parameters
     ----------
+    user_id
     subject_id
     chapter_id
-    alg
-    user_id:int
-        the id of the user
 
     Returns
     -------
-    exercise_id: int
-        the exercise id of the next exercise that has responses to grade
+    exercise_id
     """
-
-    # A query of responses graded by the user
-
-    # A sub-query of responses graded by the user
+    # The user subquery used to remove any responses the grader has graded
     user_subq = db.session.query(ResponseGrade.response_id) \
-        .filter(ResponseGrade.user_id == user_id).subquery()
-
-    # A sub-query of exercise_ids the user is unqualified to grade
+            .filter(ResponseGrade.user_id == user_id).subquery()
+    # The unqualified subquery used to remove any exercises the grader is
+    # marked as unqualified to grade.
     unqual_subq = db.session.query(UserUnqualifiedExercise.exercise_id) \
-        .filter(UserGradingSession.user_id == user_id).subquery()
+            .filter(UserGradingSession.user_id == user_id).subquery()
 
-    # Create body of the query which is Exercises and Responses ie. SELECT * FROM exercises INNER JOIN responses;
-    exercises = db.session.query(Exercise).join(Response)
+    # The main query that gets distinct counts of all grader criteria
+    g_count = db.session.query(Exercise.id.label('exercise_id'),
+                               Response.id.label('response_id'),
+                               Exercise.subject_id.label('subject_id'),
+                               Exercise.chapter_id.label('chapter_id'),
+                               func.count(func.distinct(ResponseGrade.score)).label('score'),
+                               func.count(func.distinct(ResponseGrade.misconception)).label('misconception'),
+                               func.count(func.distinct(ResponseGrade.junk)).label('junk'),
+                               func.count(func.coalesce(ResponseGrade.id, None)).label('total_count'))\
+        .join(Response)\
+        .outerjoin(ResponseGrade)\
+        .filter(~Response.id.in_(user_subq)).filter(~Exercise.id.in_(unqual_subq))\
+        .group_by(Exercise.id, Response.id, Exercise.subject_id, Exercise.chapter_id) \
 
-    # Filter by optional subject_id
+    # Filter based on the subject (optional)
     if subject_id:
-        exercises = exercises.filter(Exercise.subject_id == subject_id)
+        g_count = g_count.filter(Exercise.subject_id == subject_id)
 
-    # Filter by optional chapter_id
+    # Filter based on the chapter (optional)
     if chapter_id:
-        exercises = exercises.filter(Exercise.chapter_id == chapter_id)
+        g_count = g_count.filter(Exercise.chapter_id == chapter_id)
 
-    # Filter out anything graded by the same user and marked as unqualified
-    exercises = exercises.filter(~Response.id.in_(user_subq)) \
-        .filter(~Exercise.id.in_(unqual_subq))
+    # Get first response that only has one grade.
+    g_count_one = g_count.having(func.count(
+        func.coalesce(ResponseGrade.id, None)) == 1).first()
+    log.info('Checking for any exercises for subject {0} in chapter {1} '
+             'that have only 1 grade'.format(subject_id, chapter_id) )
+    if g_count_one:
+        log.info('Exercise {0} with 1 ungraded response was found'.format(
+            g_count_one.exercise_id))
+        return g_count_one.exercise_id
+    else:
+        # If responses can't be found with only 1 grade with then we need to
+        # look for responses that have 2 to 3 grades and any criteria where
+        # graders did not agree. We'll do this by turning
+        # the "root" query into a subquery and adjusting the
+        # having clause. This is mostly to keep our sanity. We could probably
+        # do all of this with having clauses but that would be very unreadable.
+        # Once we have the subquery we'll use that as the
+        # basis of our result set.
+        log.info('An exercise with 1 unresolved response was not found. '
+                 'Checking if other responses have unresolved score, '
+                 'misconception, or junk')
+        g_count_sub = g_count.having(
+            and_(
+                (func.count(func.coalesce(ResponseGrade.id, None)) > 1),
+                (func.count(func.coalesce(ResponseGrade.id, None)) < 4))
+        ).subquery()
 
-    # Get 100 exercises in random order and get the first that is unresolved.
-    exercises = exercises.order_by(func.random()).limit(100).all()
+        # With the global count in the from clause we can now filter based on
+        # the total_count a lot easier
+        totals = db.session.query(g_count_sub.c.exercise_id,
+                                  g_count_sub.c.response_id,
+                                  g_count_sub.c.score,
+                                  g_count_sub.c.misconception,
+                                  g_count_sub.c.junk,
+                                  g_count_sub.c.total_count)\
+            .order_by(g_count_sub.c.total_count.asc())
 
-    # Iterate over the 100 exercises for any that are unresolved
-    for exercise in exercises:
-        if exercise.has_unresolved_responses:
-            return exercise.id
+        # Check if there are 2 total grades and if there is any disagreement
+        g_count_two = totals.filter(and_(g_count_sub.c.total_count == 2,
+                                        or_(g_count_sub.c.score > 1,
+                                            g_count_sub.c.misconception > 1,
+                                            g_count_sub.c.junk > 1)))
 
-    return exercises[0].id
+        g_count_two = g_count_two.first()
+
+        if g_count_two:
+            log.info('Exercise {0} that has a response with two grades and is '
+                     'unresolved was found'.format(g_count_two.exercise_id))
+            return g_count_two.exercise_id
+        else:
+
+            g_count_three = totals.filter(
+                and_(
+                    g_count_sub.c.total_count == 3,
+                    g_count_sub.c.score > 2))
+
+            g_count_three = g_count_three.first()
+
+            if g_count_three:
+                log.info(
+                    'Exercise {0} that has a response with three grades and is '
+                    'unresolved was found'.format(g_count_three.exercise_id))
+                return g_count_three.exercise_id
+            else:
+                g_count = g_count.having(
+                    func.count(func.coalesce(
+                        ResponseGrade.id, None)) == 0).first()
+
+                if g_count:
+                    log.info(
+                        'Exercise {0} is unobserved. No unresolved responses '
+                        'found'.format(g_count.exercise_id))
+                    return g_count.exercise_id
+                else:
+                    raise Exception('The system no longer has any unobserved '
+                                    'and unresolved responses')
 
 
 def get_parsed_exercise(exercise_id):

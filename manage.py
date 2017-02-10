@@ -110,7 +110,24 @@ def create_user(email, password, subject_id):
                                    confirmed_at=datetime.now(),
                                    password=encrypted_password,
                                    subject_id=subject_id)
-    db.session.commit()
+    db.session.commit()\
+
+@manager.option('-e', '--email', dest='email')
+@manager.option('-p', '--password', dest='password')
+def change_user_password(email, password):
+
+    user_datastore = app.extensions['security'].datastore
+
+    encrypted_password = utils.encrypt_password(password)
+
+    if not user_datastore.get_user(email):
+        print('No user with that email address')
+    else:
+        user = user_datastore.get_user(email)
+        user.password = password
+        db.session.add(user)
+        db.session.commit()
+        print('Password for user was changed successfully')
 
 
 @manager.command

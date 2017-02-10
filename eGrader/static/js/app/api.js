@@ -17,7 +17,7 @@ class API {
         return exercise
     }
     
-    getNextExercise(userId, chapter_id=null) {
+    getNextExercise(chapter_id) {
         const resource = 'exercise/next';
         let response = $.ajax({
             type: 'GET',

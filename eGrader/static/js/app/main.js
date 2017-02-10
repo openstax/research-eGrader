@@ -37,6 +37,7 @@ var App = {
         this.exerciseLoading();
         let self = this;
         let chapterId = this.chapterId;
+        console.log('Getting next exercise for chapter: ' + chapterId);
         let exercise = this.API.getNextExercise(chapterId)
             .done(function(r) {
                 let exerciseId = r['exercise_id'];
@@ -168,7 +169,6 @@ var App = {
         data['user_id'] = this.userId;
         data['session_id'] = this.socketManager.getSessionId();
         data['started_on'] = this.startedOn;
-        console.log('adding started_on!' + this.responseLoaded);
         console.log('Trying to get sessionId' + this.socketManager.getSessionId());
 
         if (valid) {
