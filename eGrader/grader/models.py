@@ -4,7 +4,7 @@ from datetime import datetime
 
 import numpy as np
 from sklearn.externals import joblib
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func, or_, case
 from sqlalchemy.dialects.postgresql import ARRAY, JSON
 from sqlalchemy.sql.expression import distinct, extract, label
 
@@ -117,7 +117,13 @@ def get_next_response(user_id, exercise_id):
 
     exercise = Exercise.get(exercise_id)
 
-    if all(v is None for v in labels):
+    # Need to return response if there are any that are unresolved.
+    # If no unresolved get random
+
+    if exercise.has_unresolved_responses:
+        response = exercise.get_unresolved_response(user_id)
+        return response
+    elif all(v is None for v in labels):
         response = Response.get_random_ungraded_response(user_id, exercise_id)
         return response
     else:
@@ -136,7 +142,6 @@ def get_next_response(user_id, exercise_id):
             forest = joblib.load(forest_path)
         else:
             # Create random forest, predict best response, and save to disk.
-            # TODO: save forest to disk
             filename = 'exercise_{0}.pkl'.format(exercise_id)
             log.info(filename)
             forest_path = os.path.join(HERE, '../algs/data', filename)
@@ -160,7 +165,7 @@ def get_next_response(user_id, exercise_id):
         return responses[prediction_idx]
 
 
-def get_next_exercise_id(user_id, subject_id=None, chapter_id=None):
+def get_next_exercise_id(user_id, subject_id, chapter_id=None):
     """
     Get the next exercise prioritized on if there are any unresolved responses
     for that exercise. Prioritization is based on what is unresolved for that
@@ -213,11 +218,8 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None):
         .join(Response)\
         .outerjoin(ResponseGrade)\
         .filter(~Response.id.in_(user_subq)).filter(~Exercise.id.in_(unqual_subq))\
+        .filter(Exercise.subject_id == subject_id)\
         .group_by(Exercise.id, Response.id, Exercise.subject_id, Exercise.chapter_id) \
-
-    # Filter based on the subject (optional)
-    if subject_id:
-        g_count = g_count.filter(Exercise.subject_id == subject_id)
 
     # Filter based on the chapter (optional)
     if chapter_id:
@@ -302,8 +304,19 @@ def get_next_exercise_id(user_id, subject_id=None, chapter_id=None):
 
 
 def get_parsed_exercise(exercise_id):
-    # Get the JSON exercise data from the exercise.data field
-    # This is where the feedback, answers, and other info is located
+    """
+    Get the JSON exercise data from the exercise.data field
+    This is where the feedback, answers, and other info is located
+
+    Parameters
+    ----------
+    exercise_id
+
+    Returns
+    -------
+
+    """
+
 
     exercise = Exercise.get(exercise_id)
 
@@ -444,7 +457,9 @@ class ResponseGrade(db.Model):
 
     @classmethod
     def get_grades(cls, user_id, exercise_id):
-        query = db.session.query(distinct(Response.id), cls.junk) \
+        expr = case([(cls.junk == True, 0.0)], else_=cls.score)
+
+        query = db.session.query(distinct(Response.id), expr) \
             .outerjoin(cls, and_(cls.response_id == Response.id,
                                  cls.user_id == user_id)) \
             .filter(Response.exercise_id == exercise_id).order_by(Response.id)
