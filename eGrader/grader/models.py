@@ -315,10 +315,6 @@ def get_next_exercise_id(user_id, subject_id, chapter_id=None):
                                     'and unresolved responses')
 
 
-def get_next_exercise_id(user_id, subject_id, chapter_id=None):
-    return 816
-
-
 def get_parsed_exercise(exercise_id):
     """
     Get the JSON exercise data from the exercise.data field
