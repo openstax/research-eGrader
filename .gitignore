@@ -218,3 +218,4 @@ pip-selfcheck.json
 
 scratch.py
 *.pkl
+*.npy

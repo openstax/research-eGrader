@@ -108,8 +108,9 @@ def get_next_response(user_id, exercise_id):
     log.info(grades)
 
     # Make the labels array
-    labels = [grade[1] for grade in grades]
+    labels = [int(grade[1]) if grade[1] else grade[1] for grade in grades]
     labels_array = np.array(labels, dtype=float)
+    log.info(labels_array)
 
     # Make the global_grade_count array
     global_grade_counts = [grade_count[1] for grade_count in grade_counts]
@@ -139,7 +140,18 @@ def get_next_response(user_id, exercise_id):
             forest_path = exercise.forest_name
             log.info(forest_path)
             # Load forest and get next best response
-            forest = joblib.load(forest_path)
+            try:
+                forest = joblib.load(forest_path)
+            except IOError:
+                forest = train_random_forest(features[obs_idx],
+                                             labels_array[obs_idx])
+
+                joblib.dump(forest, forest_path)
+
+                exercise.forest_name = forest_path
+                db.session.add(exercise)
+                db.session.commit()
+
         else:
             # Create random forest, predict best response, and save to disk.
             filename = 'exercise_{0}.pkl'.format(exercise_id)
@@ -301,6 +313,10 @@ def get_next_exercise_id(user_id, subject_id, chapter_id=None):
                 else:
                     raise Exception('The system no longer has any unobserved '
                                     'and unresolved responses')
+
+
+def get_next_exercise_id(user_id, subject_id, chapter_id=None):
+    return 816
 
 
 def get_parsed_exercise(exercise_id):
