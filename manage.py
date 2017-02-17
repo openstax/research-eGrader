@@ -75,6 +75,14 @@ def update_grading_session_times():
     print('Session end times have been updated')
 
 
+@manager.command
+def update_responses_status():
+    from eGrader.tasks.update_responses_status import make_responses_inactive
+    from eGrader.tasks.update_responses_status import make_responses_active
+    make_responses_inactive()
+    make_responses_active()
+
+
 @manager.option('-e', '--email', dest='email')
 @manager.option('-p', '--password', dest='password')
 def create_admin_user(email, password):

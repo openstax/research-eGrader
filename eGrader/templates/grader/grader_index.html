@@ -1,274 +1,290 @@
 {% extends 'layouts/base.html' %}
 
 {% block styles %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    {{ stylesheet_tag('app') | safe }}
-    <script src="//cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-MML-AM_HTMLorMML-full&amp;delayStartupUntil=configured"></script>
+  {{ super() }}
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}">
+  {{ stylesheet_tag('app') | safe }}
+  <script
+    src="//cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-MML-AM_HTMLorMML-full&amp;delayStartupUntil=configured"></script>
 
 {% endblock styles %}
 
 {% block navbar %}
-    {% include 'layouts/nav.html' %}
+  {% include 'layouts/nav.html' %}
 {% endblock navbar %}
 
 {% block content %}
-    <div id="idletimeout">
-        You will be logged off in <span><!-- countdown place holder --></span>&nbsp;seconds due to inactivity.
-        <a id="idletimeout-resume" href="#">Click here to continue grading</a>.
-    </div>
+  <div id="idletimeout">
+    You will be logged off in <span><!-- countdown place holder --></span>&nbsp;seconds
+    due to inactivity.
+    <a id="idletimeout-resume" href="#">Click here to continue grading</a>.
+  </div>
 
 
-    <div class="container">
-        <div class="row">
-            <!--left box-->
-            <div class="col-xs-12 col-md-8 col-lg-8 ">
-                <!--lef side box-->
-                <div class="border_bg margin_bottom shadow-box">
-                    <div class="row grader-buttons">
-                        <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <button id="qualButton" class="btn" onClick="window.App.submitUnqualifiedExercise()">Not
-                                qualified
-                            </button>
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <a href="https://docs.google.com/a/rice.edu/forms/d/1AmwbFIRvZJ6F91PQp1I6jQgqM9Kc3qNMrHdLdqhj8FE/viewform"
-                               target="_blank">
-                                <button class="btn">Report Error</button>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <button class="btn" onClick="window.App.showReferenceBook()">View Reference</button>
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
-                            <button class="btn" id="notes_button">Hide Notes</button>
-                        </div>
-                    </div>
-                    <div>
+  <div class="container">
+    <div class="row">
+      <!--left box-->
+      <div class="col-xs-12 col-md-8 col-lg-8 ">
+        <!--lef side box-->
+        <div class="border_bg margin_bottom shadow-box">
+          <div class="row grader-buttons">
+            <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
+              <button id="qualButton" class="btn"
+                      onClick="window.App.submitUnqualifiedExercise()">Not
+                qualified
+              </button>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
+              <a
+                href="https://docs.google.com/a/rice.edu/forms/d/1AmwbFIRvZJ6F91PQp1I6jQgqM9Kc3qNMrHdLdqhj8FE/viewform"
+                target="_blank">
+                <button class="btn">Report Error</button>
+              </a>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
+              <button class="btn" onClick="window.App.showReferenceBook()">View
+                Reference
+              </button>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 small_margin">
+              <button class="btn" id="notes_button">Hide Notes</button>
+            </div>
+          </div>
+          <div>
 
-                        <div class="exercise-container loading">
-                            <div class="col-md-12 container loader">
-                                <div class="progress progress-striped active">
-                                    <div class="progress-bar"></div>
-                                </div>
-                            </div>
+            <div class="exercise-container loading">
+              <div class="col-md-12 container loader">
+                <div class="progress progress-striped active">
+                  <div class="progress-bar"></div>
+                </div>
+              </div>
 
-                            <div class="exercise-text-area" style="display:none;">
+              <div class="exercise-text-area" style="display:none;">
 
-                                <div class="col-lg-12 small_margin border padding_small">
-                                    <span class="exercise-header heading">Exercise Text:</span>
-                                    <div class="exercise-text text-style">Exercise Text Here</div>
-                                    <span class="exercise-identifier text-muted pull-right"></span>
-                                </div>
-
-                                <div class="col-lg-12 small_margin border padding_small">
-                                    <span class="exercise-answer-header heading">Correct Answer</span>
-                                    <div class="exercise-answer text-style">Exercise Answer Text Here</div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="clear"></div>
+                <div class="col-lg-12 small_margin border padding_small">
+                  <span class="exercise-header heading">Exercise Text:</span>
+                  <div class="exercise-text text-style">Exercise Text Here</div>
+                  <span
+                    class="exercise-identifier text-muted pull-right"></span>
                 </div>
 
-                <!--STUDENT RESPONSE-->
-
-                <div class="row">
-                    <div class="col-xs-12 col-md-12 col-lg-12 ">
-                        <div class="row  small_margin">
-                            <!--down box left-->
-                            <div class="col-md-12 col-xs-12 border_bg no_margin_left shadow-box">
-
-                                <div class="grader-form-container loading">
-
-                                    <div class="col-md-12 container loader">
-                                        <div class="progress progress-striped active">
-                                            <div class="progress-bar"></div>
-                                        </div>
-                                    </div>
-                                    <div class="stu-response-container border padding_small " style="display:none;">
-                                        <span class="stu-response-header heading">Student Response</span>
-                                        <div class="stu-response text-style"><!--STUDENT RESPONSE HERE--></div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-12 ">
-
-
-                                            <div class="grader-form" style="display:none">
-                                                <!-- THE GRADER FORM IS INSERTED HERE -->
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                <div class="col-lg-12 small_margin border padding_small">
+                  <span
+                    class="exercise-answer-header heading">Correct Answer</span>
+                  <div class="exercise-answer text-style">Exercise Answer Text
+                    Here
+                  </div>
                 </div>
-
-                <!--right box-->
-
+              </div>
 
             </div>
-            <div class="col-xs-12 col-md-4 col-lg-4 shadow-box" id="notes_box">
-                <form action="" method="post" id="notes_form" name="notes">
-                    <div class="row border_bg tab_width">
-                        <div class="notes-header heading">Notes</div>
-                            <span>
+          </div>
+
+          <div class="clear"></div>
+        </div>
+
+        <!--STUDENT RESPONSE-->
+
+        <div class="row">
+          <div class="col-xs-12 col-md-12 col-lg-12 ">
+            <div class="row  small_margin">
+              <!--down box left-->
+              <div
+                class="col-md-12 col-xs-12 border_bg no_margin_left shadow-box">
+
+                <div class="grader-form-container loading">
+
+                  <div class="col-md-12 container loader">
+                    <div class="progress progress-striped active">
+                      <div class="progress-bar"></div>
+                    </div>
+                  </div>
+                  <div class="stu-response-container border padding_small "
+                       style="display:none;">
+                    <span
+                      class="stu-response-header heading">Student Response</span>
+                    <div class="stu-response text-style">
+                      <!--STUDENT RESPONSE HERE--></div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-12 ">
+
+
+                      <div class="grader-form" style="display:none">
+                        <!-- THE GRADER FORM IS INSERTED HERE -->
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!--right box-->
+
+
+      </div>
+      <div class="col-xs-12 col-md-4 col-lg-4 shadow-box" id="notes_box">
+        <form action="" method="post" id="notes_form" name="notes">
+          <div class="row border_bg tab_width">
+            <div class="notes-header heading">Notes</div>
+            <span>
 
                                 <textarea class="notes-text"></textarea>
 
                             </span>
-                        <span><button type="button" class="btn btn-success small_margin" onClick="window.App.addNote()">Add Note</button></span>
-                        <div class="clear"></div>
-                    </div>
-                </form>
-                <div class="note-ledger"></div>
-            </div>
-        </div>
+            <span><button type="button" class="btn btn-success small_margin"
+                          onClick="window.App.addNote()">Add Note</button></span>
+            <div class="clear"></div>
+          </div>
+        </form>
+        <div class="note-ledger"></div>
+      </div>
     </div>
+  </div>
 
 {% endblock content %}
 
 {% block scripts %}
-    {{ super() }}
-    {{ javascript_tag('app') | safe }}
+  {{ super() }}
+  {{ javascript_tag('app') | safe }}
 
-    <script>
+  <script>
 
-        const userId = {{ user_id }};
+    const userId = {{ user_id }};
 
-        document.addEventListener("DOMContentLoaded", function (event) {
-            window.App.start(userId);
+    document.addEventListener("DOMContentLoaded", function (event) {
+      window.App.start(userId);
 
-        });
+    });
 
-    </script>
-    <script src="{{ url_for('static', filename='js/lib/jquery.idletimer.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='js/lib/jquery.idletimeout.js') }}" type="text/javascript"></script>
-    <script type="text/javascript">
-        $.idleTimeout('#idletimeout', '#idletimeout a', {
-            idleAfter: 15 * 60,
-            onTimeout: function () {
-                $(this).slideUp();
-                window.location = "{{ url_for('dashboard.index') }}";
-            },
-            onIdle: function () {
-                $(this).slideDown(); // show the warning bar
-            },
-            onCountdown: function (counter) {
-                $(this).find("span").html(counter); // update the counter
-            },
-            onResume: function () {
-                $(this).slideUp(); // hide the warning bar
-            }
-        });
-    </script>
-
-
-    {% raw %}
-    <script id="grader-form-template" type="text/x-underscore-template">
-
-        <form id="grader-response" name="grader-response">
-            <input type="hidden" id="responseId" name="responseId" value=""/>
-            <input type="hidden" id="feedbackId" name="feedback_id" value="null"/>
-
-            <ul class="quality_ul">
-                <li>
-                    <div class="row">
-                        <div class="col-md-4 bold">Quality</div>
-                        <div class="col-md-8">
-                            <select required class="quality form-control" name="quality">
-                                <option value="null">---Select a quality option---</option>
-                                <option value="t">Junk</option>
-                                <option value="f">Not Junk</option>
-                            </select>
-                        </div>
-                    </div>
-                </li>
-                <div class="extra_options">
-                    <li>
-                        <div class="row">
-                            <div class="col-md-4 bold">Score</div>
-                            <div class="col-md-8">
-                                    <div class="radio">
-                                        <label><input type="radio" name="score" value="0">No Credit</label>
-                                    </div>
-                                    <div class="radio">
-                                        <label><input type="radio" name="score" value="1">Full Credit</label>
-                                    </div>
-                                    <div class="radio">
-                                        <label><input type="radio" name="score" value=".5">Partial Credit</label>
-                                    </div>
-<!--                                <select required class="score form-control" name="score">
-                                    <option value="null">---Select an option---</option>
-                                    <option value="0">No Credit</option>
-                                    <option value="1">Full Credit</option>
-                                    <option value="0.5">Partial Credit</option>
-                                </select>
--->
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="row">
-                            <div class="col-md-4 bold">Misconception?</div>
-                            <div class="col-md-8">
-                                 <div class="radio">
-                                    <label><input type="radio" name="misconception" value="t">Yes</label>
-                                </div>
-                                <div class="radio">
-                                    <label><input type="radio" name="misconception" value="n">No</label>
-                                </div>
-<!--                                <select required class="misconception form-control" name="misconception">
-                                    <option value="null">---Select an option---</option>
-                                    <option value="t">Yes</option>
-                                    <option value="f">No</option>
-                                </select>
--->
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="row">
-                            <div class="col-md-4 bold">Feedback</div>
-
-                                <div class="col-md-8">
-                                    <div class="feedback-dropdown">
-                                        <div class="choices">
-                                            <div class="choice" data-value="null">
-                                                ---Select an option---
-                                            </div>
-
-                                            <div class="choice" data-value="0">
-                                                None of the options apply
-                                            </div>
+  </script>
+  <script src="{{ url_for('static', filename='js/lib/jquery.idletimer.js') }}"
+          type="text/javascript"></script>
+  <script src="{{ url_for('static', filename='js/lib/jquery.idletimeout.js') }}"
+          type="text/javascript"></script>
+  <script type="text/javascript">
+    $.idleTimeout('#idletimeout', '#idletimeout a', {
+      idleAfter: 15 * 60,
+      onTimeout: function () {
+        $(this).slideUp();
+        window.location = "{{ url_for('dashboard.index') }}";
+      },
+      onIdle: function () {
+        $(this).slideDown(); // show the warning bar
+      },
+      onCountdown: function (counter) {
+        $(this).find("span").html(counter); // update the counter
+      },
+      onResume: function () {
+        $(this).slideUp(); // hide the warning bar
+      }
+    });
+  </script>
 
 
+  {% raw %}
+  <script id="grader-form-template" type="text/x-underscore-template">
 
-    <!--                            <select required class="feedback form-control" name="feedback_id">
-                                        <option value="null">---Select an option---</option>
-                                        <option value="0">None of the options apply</option>
-                                    </select>
+    <form id="grader-response" name="grader-response">
+      <input type="hidden" id="responseId" name="responseId" value=""/>
+      <input type="hidden" id="feedbackId" name="feedback_id" value="null"/>
 
-
-    -->                                 </div>
-                                    </div>
-                            </div>
-                        </div>
-                    </li>
+      <ul class="quality_ul">
+        <li>
+          <div class="row">
+            <div class="col-md-4 bold">Quality</div>
+            <div class="col-md-8">
+              <select required class="quality form-control" name="quality">
+                <option value="null">---Select a quality option---</option>
+                <option value="t">Junk</option>
+                <option value="f">Not Junk</option>
+              </select>
+            </div>
+          </div>
+        </li>
+        <div class="extra_options">
+          <li>
+            <div class="row">
+              <div class="col-md-4 bold">Score</div>
+              <div class="col-md-8">
+                <div class="radio">
+                  <label><input type="radio" name="score" value="0">No
+                    Credit</label>
                 </div>
-            </ul>
-            <div class="clear"></div>
-            <button type="button" id="graderSubmit" class="btn btn-success small_margin">Submit</button>
-        </form>
-    </script>
-    {% endraw %}
+                <div class="radio">
+                  <label><input type="radio" name="score" value="1">Full Credit</label>
+                </div>
+                <div class="radio">
+                  <label><input type="radio" name="score" value=".5">Partial
+                    Credit</label>
+                </div>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <div class="col-md-4 bold">Misconception?</div>
+              <div class="col-md-8">
+                <div class="radio">
+                  <label><input type="radio" name="misconception" value="t">Yes</label>
+                </div>
+                <div class="radio">
+                  <label><input type="radio" name="misconception" value="n">No</label>
+                </div>
+
+              </div>
+            </div>
+          </li>
+
+          <li>
+            <div class="row explanation" style="display:none">
+              <div class="col-md-8 col-md-offset-4">
+                <div class="form-group">
+                  <span>Please explain the misconception below:</span>
+                  <textarea class="form-control" rows="1"
+                            id="explanation-textarea" name="explanation"></textarea>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li>
+            <div class="row">
+              <div class="col-md-4 bold">Feedback</div>
+
+              <div class="col-md-8">
+                <div class="feedback-dropdown">
+                  <div class="choices">
+                    <div class="choice" data-value="null">
+                      ---Select an option---
+                    </div>
+
+                    <div class="choice" data-value="0">
+                      None of the options apply
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        </div>
+      </ul>
+      <div class="clear"></div>
+      <button type="button" id="graderSubmit"
+              class="btn btn-success small_margin">Submit
+      </button>
+    </form>
+  </script>
+  {% endraw %}
 
 
 {% endblock scripts %}

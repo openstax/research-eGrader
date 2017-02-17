@@ -105,6 +105,7 @@ def submit_grader_response():
         response_id=posted['responseId'] if posted['responseId'] else None,
         score=posted['score'] if 'score' in posted else None,
         misconception = posted['misconception'] if 'misconception' in posted else None,
+        explanation = posted['explanation'] if 'explanation' else None,
         junk = posted['quality'],
         feedback_id = posted['feedback_id'] if posted['quality'] else None,
         submitted_on = datetime.utcnow(),
