@@ -231,6 +231,7 @@ def get_next_exercise_id(user_id, subject_id, chapter_id=None):
         .outerjoin(ResponseGrade)\
         .filter(~Response.id.in_(user_subq)).filter(~Exercise.id.in_(unqual_subq))\
         .filter(Exercise.subject_id == subject_id)\
+        .filter(Response.active == True)\
         .group_by(Exercise.id, Response.id, Exercise.subject_id, Exercise.chapter_id) \
 
     # Filter based on the chapter (optional)
@@ -428,6 +429,7 @@ class ResponseGrade(db.Model):
     response_id = db.Column(db.Integer(), db.ForeignKey('responses.id'))
     score = db.Column(db.Float())
     misconception = db.Column(db.Boolean())
+    explanation = db.Column(db.Text(), nullable=True)
     junk = db.Column(db.Boolean())
     feedback_id = db.Column(db.Integer())
     started_on = db.Column(db.DateTime())
@@ -501,6 +503,7 @@ class Response(db.Model, JsonSerializer):
     created_on = db.Column(db.DateTime(), default=datetime.utcnow())
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow(),
                            onupdate=datetime.utcnow())
+    active = db.Column(db.Boolean())
 
     @classmethod
     def count(cls):

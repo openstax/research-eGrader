@@ -1,7 +1,7 @@
 import $ from "jquery";
 import _ from "underscore";
 import noty from "noty";
-import {activateFormWidget, activateNoteWidget, activateGraderSubmitButton} from "./events.js";
+import {activateFormWidget, activateNoteWidget, activateGraderSubmitButton, activateMisconceptionWidget} from "./events.js";
 import API from "./api.js";
 import getFormData from "./utils.js";
 import {startMathJax, typesetMath} from "./mathjax.js";
@@ -30,6 +30,7 @@ var App = {
 
     activateEvents() {
         activateNoteWidget();
+
     },
 
     getNextExercise() {
@@ -138,6 +139,7 @@ var App = {
         let dd = new DropDown($('.feedback-dropdown'), $('#feedbackId'));
 
         activateFormWidget();
+        activateMisconceptionWidget();
         typesetMath(document);
         this.responseDelayLoad();
 
@@ -264,9 +266,25 @@ var App = {
             //if junk = false then we need to validate the rest of the form
             if (score == false || misconception == false || feedback == false) {
                 this.notifyError('There was an error. Please make sure you made all selections')
-            } else {
+            } else if (misconception == true) {
+                let $explanation = $('#explanation-textarea').val();
+
+                // See which item is checked
+                let $checked = $("input[name='misconception']:checked");
+
+                if ($checked.val() == 't' && $explanation.length > 0) {
+                    console.log('there is an explanation!');
+                  return true
+                } else {
+                    console.log('This is fail!!!');
+                  return false
+                }
+
+            }
+            else {
                 return true
             }
+
         } else {
             this.notifyError('There was an error. Please make a quality selection')
         }

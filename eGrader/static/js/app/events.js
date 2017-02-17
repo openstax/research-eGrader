@@ -27,7 +27,21 @@ var activateFormWidget = function() {
             $(this).parent().parent().parent().next().show();
         }
     });
-}; 
+};
+
+var activateMisconceptionWidget = function(){
+
+    console.log('MisconceptionWidget activated!');
+    $("input[name='misconception']").on('change', function() {
+        console.log($(this).val());
+        if ($(this).val() == 't') {
+            $('.explanation').show()
+
+        } else {
+            $('.explanation').hide()
+        }
+    })
+};
 
 var activateGraderSubmitButton = function(callback) {
     $('#graderSubmit').on('click', callback);
@@ -37,4 +51,4 @@ var activateQualButton = function(callback) {
     $('#qualButton').on('click', callback)
 };
 
-export {activateFormWidget, activateNoteWidget, activateGraderSubmitButton, activateQualButton}
+export {activateFormWidget, activateNoteWidget, activateGraderSubmitButton, activateQualButton, activateMisconceptionWidget}
