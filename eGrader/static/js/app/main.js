@@ -271,13 +271,18 @@ var App = {
 
                 // See which item is checked
                 let $checked = $("input[name='misconception']:checked");
+                console.log($checked.val());
+                console.log($explanation);
 
                 if ($checked.val() == 't' && $explanation.length > 0) {
-                    console.log('there is an explanation!');
+                    console.log('Explanation provided for misconception');
+                  return true
+                } else if ($checked.val() == 'n'){
+                    console.log('Misconception is false');
                   return true
                 } else {
-                    console.log('This is fail!!!');
-                  return false
+                    this.notifyError('There was an error. Please enter an explanation for the misconception');
+                    return false
                 }
 
             }

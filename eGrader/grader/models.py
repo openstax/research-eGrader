@@ -120,10 +120,11 @@ def get_next_response(user_id, exercise_id):
 
     # Need to return response if there are any that are unresolved.
     # If no unresolved get random
+    unresolved = exercise.get_unresolved_response(user_id)
 
-    if exercise.has_unresolved_responses:
-        response = exercise.get_unresolved_response(user_id)
-        return response
+    if unresolved:
+        return unresolved
+
     elif all(v is None for v in labels):
         response = Response.get_random_ungraded_response(user_id, exercise_id)
         return response
@@ -560,23 +561,22 @@ class Response(db.Model, JsonSerializer):
         junk = grades[3]
         total_grades = grades[4]
 
-        if total_grades == 0:
-            return False
-
         if total_grades == 1:
             return True
 
-        if total_grades == 2:
+        elif total_grades == 2:
             if score > 1 or misconception > 1 or junk > 1:
                 return True
             else:
                 return False
 
-        if total_grades == 3:
+        elif total_grades == 3:
             if score > 2:
                 return True
             else:
                 return False
+        else:
+            return False
 
     @property
     def is_unresolved(self):
@@ -630,9 +630,14 @@ class Exercise(db.Model, JsonSerializer):
     def get(cls, exercise_id):
         return db.session.query(cls).get(exercise_id)
 
-    @property
-    def has_unresolved_responses(self):
-        responses = Response.all_by_exercise_id(self.id)
+    def has_unresolved_responses(user_id, exercise_id):
+        user_subq = db.session.query(ResponseGrade.response_id) \
+            .filter(ResponseGrade.user_id == user_id).subquery()
+
+        responses = db.session.query(Response) \
+            .filter(Response.exercise_id == exercise_id) \
+            .filter(~Response.id.in_(user_subq)) \
+            .all()
         unresolved = False
         for response in responses:
             if response.is_unresolved:
