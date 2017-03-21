@@ -1,6 +1,6 @@
 from datetime import datetime
-from flask import (current_app,
-                   Blueprint,
+
+from flask import (Blueprint,
                    flash,
                    redirect,
                    render_template,
@@ -8,7 +8,6 @@ from flask import (current_app,
                    url_for)
 from flask_principal import Permission, RoleNeed
 from flask_security.utils import encrypt_password
-
 
 from eGrader.accounts.models import User, Role
 from eGrader.admin.exports import (list_graded_responses,
@@ -19,7 +18,7 @@ from eGrader.admin.exports import (list_graded_responses,
                                    list_all_results)
 from eGrader.admin.forms import CreateUserForm, UpdateUserForm
 from eGrader.core import db
-from eGrader.grader.models import ResponseGrade, Response, get_admin_metrics
+from eGrader.grader.models import get_admin_metrics
 from eGrader.utils import render_csv
 
 admin_permission = Permission(RoleNeed('admin'))
@@ -202,5 +201,8 @@ def export_all():
             'chapter_id',
             'section_id',
             'correct',
-            'submitted_on']
+            'submitted_on',
+            'session_id',
+            'session_started_on',
+            'session_ended_on']
     return render_csv(atts, all, 'big_daddy_export')

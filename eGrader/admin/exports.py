@@ -89,9 +89,14 @@ def list_all_results():
                            Exercise.chapter_id,
                            Exercise.section_id,
                            Response.correct,
-                           ResponseGrade.submitted_on
-    ).join(ResponseGrade).join(User).join(Exercise).join(Subject)
-
-    results = results.filter(~User.id.in_(admin_users))
+                           ResponseGrade.submitted_on,
+                           UserGradingSession.id.label('session_id'),
+                           UserGradingSession.started_on.label('session_started_on'),
+                           UserGradingSession.ended_on.label('session_ended_on'))\
+        .outerjoin(ResponseGrade)\
+        .outerjoin(User)\
+        .outerjoin(Exercise)\
+        .outerjoin(Subject)\
+        .outerjoin(UserGradingSession, ResponseGrade.session_id == UserGradingSession.id)
 
     return results.all()
