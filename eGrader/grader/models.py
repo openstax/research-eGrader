@@ -217,7 +217,7 @@ def get_next_exercise_id(user_id, subject_id, chapter_id=None):
     # The unqualified subquery used to remove any exercises the grader is
     # marked as unqualified to grade.
     unqual_subq = db.session.query(UserUnqualifiedExercise.exercise_id) \
-            .filter(UserGradingSession.user_id == user_id).subquery()
+            .filter(UserUnqualifiedExercise.user_id == user_id).subquery()
 
     # The main query that gets distinct counts of all grader criteria
     g_count = db.session.query(Exercise.id.label('exercise_id'),
